@@ -8,7 +8,7 @@ Screen {
     border-top: tall $primary;
 }
 
-#hex-area {
+#hex-grid {
     width: 75%;
     height: 1fr;
     overflow-y: scroll;
