@@ -12,38 +12,54 @@ class HexRow(Static):
         self.data_offset = offset
         self.data = data
 
+    @staticmethod
+    def byte_color(byte: int) -> str:
+        if byte == 0x00:
+            return "bright_black"
+        elif byte == 0xff:
+            return "bright_red"
+        elif 0 < byte < 32 or byte == 0x7f:
+            return "bright_green"
+        elif 32 <= byte <= 126:
+            return "cyan"
+
+        return "dark_orange"
+
+    @staticmethod
+    def byte_representation(byte: int) -> str:
+        if byte == 0x00 or byte == 0xff:
+            return "⋄"
+        elif 0 < byte < 32 or byte == 0x7f:
+            return "•"
+        elif 32 <= byte <= 126:
+            return chr(byte)
+
+        return "×"
+
     def render(self) -> Text:
         line = Text()
 
         # Offset
-        line.append(f"{self.data_offset:08x}")
-        line.append(" │ ", style="white")
+        line.append("│", style="white")
+        line.append(f"{self.data_offset:08x}", style="bright_black")
+        line.append("│ ", style="white")
 
         # Hex View with color coding
         for position, byte in enumerate(self.data):
-            if byte == 0x00:
-                style = "bright_black"
-            elif byte == 0xff:
-                style = "bright_red"
-            elif 32 <= byte <= 126:
-                style = "cyan"
-            else:
-                style = "white"  # Others
-
+            style = self.byte_color(byte)
             line.append(f"{byte:02x} ", style=style)
 
             # Put space between 8-byte blocks
             if position == 7:
                 line.append("┊ ", style="white")
 
-        line.append(" │ ", style="white")
+        line.append("│ ", style="white")
 
         # ASCII View
         for position, byte in enumerate(self.data):
-            if 32 <= byte <= 126:
-                line.append(chr(byte), style="cyan")
-            else:
-                line.append("•", style="bright_black")
+            style = self.byte_color(byte)
+            byte_repr = self.byte_representation(byte)
+            line.append(byte_repr, style=style)
 
             # Put space between 8-byte blocks
             if position == 7:
@@ -75,9 +91,10 @@ class PixieDust(App):
         yield Header()
         with Horizontal(id="main-container"):
             with Vertical(id="hex-area"):
-                # Initial dummy data for visual testing
-                for i in range(0, 512, 16):
-                    yield HexRow(i, b"\x00\x41\x42\x43\xff\x00\x20\x21" * 2)
+                with open('demo.bin', 'rb') as demo_file:
+                    demo_data = demo_file.read()
+                    for offset in range(0, len(demo_data), 16):
+                        yield HexRow(offset, demo_data[offset:offset+16])
             yield Inspector(id="inspector-panel")
         yield Footer()
 
