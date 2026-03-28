@@ -1,6 +1,7 @@
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Header, Footer, Static, Label
+from rich.text import Text
 
 
 class HexRow(Static):
@@ -11,11 +12,44 @@ class HexRow(Static):
         self.data_offset = offset
         self.data = data
 
-    def render(self) -> str:
-        # Formatting: Offset | Hex Bytes | ASCII
-        hex_part = " ".join(f"{b:02x}" for b in self.data)
-        ascii_part = "".join(chr(b) if 32 <= b <= 126 else "." for b in self.data)
-        return f"[yellow]{self.data_offset:08x}[/yellow] | {hex_part:<47} | [green]{ascii_part}[/green]"
+    def render(self) -> Text:
+        line = Text()
+
+        # Offset
+        line.append(f"{self.data_offset:08x}")
+        line.append(" │ ", style="white")
+
+        # Hex View with color coding
+        for position, byte in enumerate(self.data):
+            if byte == 0x00:
+                style = "bright_black"
+            elif byte == 0xff:
+                style = "bright_red"
+            elif 32 <= byte <= 126:
+                style = "cyan"
+            else:
+                style = "white"  # Others
+
+            line.append(f"{byte:02x} ", style=style)
+
+            # Put space between 8-byte blocks
+            if position == 7:
+                line.append("┊ ", style="white")
+
+        line.append(" │ ", style="white")
+
+        # ASCII View
+        for position, byte in enumerate(self.data):
+            if 32 <= byte <= 126:
+                line.append(chr(byte), style="cyan")
+            else:
+                line.append("•", style="bright_black")
+
+            # Put space between 8-byte blocks
+            if position == 7:
+                line.append("┊", style="white")
+
+        return line
 
 
 class Inspector(Vertical):
@@ -29,35 +63,7 @@ class Inspector(Vertical):
 
 
 class PixieDust(App):
-    CSS = """
-    Screen {
-        layers: base;
-    }
-
-    #main-container {
-        height: 100%;
-    }
-
-    #hex-area {
-        width: 75%;
-        border: solid $accent;
-        padding: 1;
-        overflow-y: scroll;
-    }
-
-    #inspector-panel {
-        width: 25%;
-        border-left: tall $primary;
-        background: $surface;
-        padding: 1;
-    }
-
-    #inspector-title {
-        text-style: bold;
-        margin-bottom: 1;
-        color: $secondary;
-    }
-    """
+    CSS_PATH = "app.tcss"
 
     BINDINGS = [
         ("q", "quit", "Quit"),
@@ -70,8 +76,8 @@ class PixieDust(App):
         with Horizontal(id="main-container"):
             with Vertical(id="hex-area"):
                 # Initial dummy data for visual testing
-                for i in range(0, 256, 16):
-                    yield HexRow(i, b"\x00" * 16)
+                for i in range(0, 512, 16):
+                    yield HexRow(i, b"\x00\x41\x42\x43\xff\x00\x20\x21" * 2)
             yield Inspector(id="inspector-panel")
         yield Footer()
 
