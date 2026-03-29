@@ -5,8 +5,6 @@ from hex_view import HexView
 
 
 class PixieDust(App):
-    CSS_PATH = "app.tcss"
-
     BINDINGS = [
         ("q", "quit", "Quit"),
         ("o", "open_file", "Open"),

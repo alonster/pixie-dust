@@ -51,7 +51,7 @@ class HexRow(Static):
         line.append(f"{self.data_offset:08x}", style="bright_black")
         line.append("│ ", style="white")
 
-        # Hex View with color coding
+        # Hex View
         for position, byte in enumerate(self.data):
             style = self.byte_color(byte)
             if position == self.selected_column:
@@ -97,8 +97,6 @@ class HexGrid(Vertical):
         self.data = data
 
     class PositionChanged(Message):
-        """Custom message to notify parent about cursor movement."""
-
         def __init__(self, pos: int):
             self.pos = pos
             super().__init__()
@@ -109,9 +107,7 @@ class HexGrid(Vertical):
 
     @current_pos.setter
     def current_pos(self, value: int) -> None:
-        # Calculate the maximum allowed position based on actual rows
-        max_pos = max(0, (len(self.query(HexRow)) * 16) - 1)
-        # Clamp the value between 0 and max_pos
+        max_pos = max(0, (len(self.data)) - 1)
         self._current_pos = max(0, min(value, max_pos))
 
     @property
@@ -123,6 +119,9 @@ class HexGrid(Vertical):
         return self.current_pos % 16
 
     def on_mount(self) -> None:
+        self.styles.height = "100%"
+        self.styles.padding = (1, 1)
+
         self.can_focus = True
         self.focus()
         self.refresh_selection()
@@ -149,6 +148,5 @@ class HexGrid(Vertical):
         self.current_pos += 1
 
     def compose(self) -> ComposeResult:
-        with Vertical(id="hex-grid-vertical"):
-            for offset in range(0, len(self.data), 16):
-                yield HexRow(offset, self.data[offset:offset + 16])
+        for offset in range(0, len(self.data), 16):
+            yield HexRow(offset, self.data[offset:offset + 16])
