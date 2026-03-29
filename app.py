@@ -11,10 +11,16 @@ class PixieDust(App):
         ("e", "toggle_edit", "Edit Mode"),
     ]
 
+    hex_view = HexView('')
+
     def compose(self) -> ComposeResult:
         yield Header()
-        yield HexView(file_path='demo.bin')
+        self.hex_view = HexView(file_path='demo.bin')
+        yield self.hex_view
         yield Footer()
+
+    def action_toggle_edit(self) -> None:
+        self.hex_view.action_toggle_edit()
 
 
 if __name__ == "__main__":

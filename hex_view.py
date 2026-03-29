@@ -1,27 +1,34 @@
 from textual.app import ComposeResult
 from textual.containers import Horizontal
+from textual.reactive import reactive
 
 from hex_grid import HexGrid
 from data_inspector import Inspector
 
 
 class HexView(Horizontal):
+    is_editing = reactive(False)
+
     def __init__(self, file_path: str):
         super().__init__()
         self.file_path = file_path
-        self.data = b''
-        self.grid = HexGrid(b'')
+        self.data = bytearray()
+        self.grid = HexGrid(self.data)
         self.inspector = Inspector()
 
     def compose(self) -> ComposeResult:
         with open(self.file_path, 'rb') as f:
-            self.data = f.read()
+            self.data = bytearray(f.read())
 
         self.grid = HexGrid(self.data)
         self.inspector = Inspector()
 
         yield self.grid
         yield self.inspector
+
+    def action_toggle_edit(self) -> None:
+        self.is_editing = not self.is_editing
+        self.grid.is_editing = self.is_editing
 
     def on_mount(self) -> None:
         self.styles.height = "100%"

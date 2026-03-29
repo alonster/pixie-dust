@@ -9,8 +9,9 @@ from rich.text import Text
 
 class HexRow(Static):
     selected_column = reactive(-1)
+    is_editing = reactive(False)
 
-    def __init__(self, offset: int, data: bytes):
+    def __init__(self, offset: int, data: bytearray):
         super().__init__()
         self.data_offset = offset
         self.data = data
@@ -28,8 +29,9 @@ class HexRow(Static):
 
         return "dark_orange"
 
-    @staticmethod
-    def add_selected_style(style: str) -> str:
+    def add_selected_style(self, style: str) -> str:
+        if self.is_editing:
+            return style + " bold black on yellow blink"
         return style + " reverse bold"
 
     @staticmethod
@@ -87,6 +89,7 @@ class HexRow(Static):
 
 class HexGrid(Vertical):
     _current_pos = reactive(0)
+    is_editing = reactive(False)
 
     BINDINGS = [
         Binding("up", "move_up", show=False),
@@ -95,7 +98,7 @@ class HexGrid(Vertical):
         Binding("right", "move_right", show=False),
     ]
 
-    def __init__(self, data: bytes, *args, **kwargs):
+    def __init__(self, data: bytearray, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.data = data
 
@@ -133,10 +136,15 @@ class HexGrid(Vertical):
         self.refresh_selection()
         self.post_message(self.PositionChanged(new_pos))
 
+    def watch_is_editing(self, value: bool) -> None:
+        self.refresh_selection()
+
     def refresh_selection(self) -> None:
         rows = self.query(HexRow)
         for index, row in enumerate(rows):
-            row.selected_column = self.current_col if index == self.current_row else -1
+            is_active_row = (index == self.current_row)
+            row.selected_column = self.current_col if is_active_row else -1
+            row.is_editing = self.is_editing if is_active_row else False
 
     def action_move_up(self) -> None:
         self.current_pos -= 16
