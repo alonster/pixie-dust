@@ -33,7 +33,10 @@ class HexRow(Static):
         return style + " reverse bold"
 
     @staticmethod
-    def byte_representation(byte: int) -> str:
+    def byte_representation(byte: int, is_raw=False) -> str:
+        if is_raw:
+            return f"{byte:02x}"
+
         if byte == 0x00 or byte == 0xff:
             return "⋄"
         elif 0 < byte < 32 or byte == 0x7f:
@@ -43,6 +46,31 @@ class HexRow(Static):
 
         return "×"
 
+    def render_section(self, is_hex=False) -> Text:
+        section = Text()
+        for position, byte in enumerate(self.data):
+            style = self.byte_color(byte)
+            data_repr = self.byte_representation(byte, is_raw=is_hex)
+            if position == self.selected_column:
+                style = self.add_selected_style(style)
+
+            section.append(data_repr, style=style)
+            if is_hex:
+                section.append(" ")
+
+            if position == 7:
+                section.append("┊", style="white")
+                if is_hex:
+                    section.append(" ")
+
+        return section
+
+    def render_hex_section(self, line: Text):
+        line.append(self.render_section(is_hex=True))
+
+    def render_ascii_section(self, line: Text):
+        line.append(self.render_section(is_hex=False))
+
     def render(self) -> Text:
         line = Text()
 
@@ -51,34 +79,9 @@ class HexRow(Static):
         line.append(f"{self.data_offset:08x}", style="bright_black")
         line.append("│ ", style="white")
 
-        # Hex View
-        for position, byte in enumerate(self.data):
-            style = self.byte_color(byte)
-            if position == self.selected_column:
-                style = self.add_selected_style(style)
-
-            line.append(f"{byte:02x}", style=style)
-            line.append(" ")
-
-            # Put space between 8-byte blocks
-            if position == 7:
-                line.append("┊ ", style="white")
-
+        self.render_hex_section(line)
         line.append("│ ", style="white")
-
-        # ASCII View
-        for position, byte in enumerate(self.data):
-            style = self.byte_color(byte)
-            byte_repr = self.byte_representation(byte)
-            if position == self.selected_column:
-                style = self.add_selected_style(style)
-
-            line.append(byte_repr, style=style)
-
-            # Put space between 8-byte blocks
-            if position == 7:
-                line.append("┊", style="white")
-
+        self.render_ascii_section(line)
         return line
 
 
