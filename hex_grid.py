@@ -1,3 +1,4 @@
+from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
@@ -11,7 +12,7 @@ class HexRow(Static):
     selected_column = reactive(-1)
     is_editing = reactive(False)
 
-    def __init__(self, offset: int, data: bytearray):
+    def __init__(self, offset: int, data: memoryview):
         super().__init__()
         self.data_offset = offset
         self.data = data
@@ -90,6 +91,7 @@ class HexRow(Static):
 class HexGrid(Vertical):
     _current_pos = reactive(0)
     is_editing = reactive(False)
+    _edit_buffer = ""
 
     BINDINGS = [
         Binding("up", "move_up", show=False),
@@ -98,8 +100,8 @@ class HexGrid(Vertical):
         Binding("right", "move_right", show=False),
     ]
 
-    def __init__(self, data: bytearray, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, data: memoryview):
+        super().__init__()
         self.data = data
 
     class PositionChanged(Message):
@@ -157,6 +159,38 @@ class HexGrid(Vertical):
 
     def action_move_right(self) -> None:
         self.current_pos += 1
+
+    def on_key(self, event: "events.Key") -> None:
+        if not self.is_editing:
+            return
+
+        key = event.character
+        if key and key.lower() in "0123456789abcdef":
+            event.stop()
+            self.handle_hex_input(key.lower())
+            return
+
+        self._edit_buffer = ""
+        if event.key == "escape":
+            self.is_editing = False
+
+    def handle_hex_input(self, hex_char: str) -> None:
+        full_hex = self._edit_buffer + hex_char
+        new_byte_value = int(full_hex, 16)
+        self.update_byte(new_byte_value)
+
+        if not self._edit_buffer:
+            self._edit_buffer = hex_char
+        else:
+            self._edit_buffer = ""
+            self.current_pos += 1
+            self.refresh_selection()
+
+    def update_byte(self, new_value: int):
+        self.data[self.current_pos] = new_value
+        rows = self.query(HexRow)
+        if self.current_row < len(rows):
+            rows[self.current_row].refresh()
 
     def compose(self) -> ComposeResult:
         for offset in range(0, len(self.data), 16):

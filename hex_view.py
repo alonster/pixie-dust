@@ -13,14 +13,14 @@ class HexView(Horizontal):
         super().__init__()
         self.file_path = file_path
         self.data = bytearray()
-        self.grid = HexGrid(self.data)
+        self.grid = HexGrid(memoryview(self.data))
         self.inspector = Inspector()
 
     def compose(self) -> ComposeResult:
         with open(self.file_path, 'rb') as f:
             self.data = bytearray(f.read())
 
-        self.grid = HexGrid(self.data)
+        self.grid = HexGrid(memoryview(self.data))
         self.inspector = Inspector()
 
         yield self.grid
