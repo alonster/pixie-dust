@@ -1,6 +1,7 @@
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
+from textual.message import Message
 from textual.reactive import reactive
 from textual.widgets import Static
 from rich.text import Text
@@ -91,6 +92,17 @@ class HexGrid(Vertical):
         Binding("right", "move_right", show=False),
     ]
 
+    def __init__(self, data: bytes, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data = data
+
+    class PositionChanged(Message):
+        """Custom message to notify parent about cursor movement."""
+
+        def __init__(self, pos: int):
+            self.pos = pos
+            super().__init__()
+
     @property
     def current_pos(self) -> int:
         return self._current_pos
@@ -115,8 +127,9 @@ class HexGrid(Vertical):
         self.focus()
         self.refresh_selection()
 
-    def watch__current_pos(self) -> None:
+    def watch__current_pos(self, new_pos: int) -> None:
         self.refresh_selection()
+        self.post_message(self.PositionChanged(new_pos))
 
     def refresh_selection(self) -> None:
         rows = self.query(HexRow)
@@ -136,9 +149,6 @@ class HexGrid(Vertical):
         self.current_pos += 1
 
     def compose(self) -> ComposeResult:
-        with open('demo.bin', 'rb') as demo_file:
-            demo_data = demo_file.read()
-
         with Vertical(id="hex-grid-vertical"):
-            for offset in range(0, len(demo_data), 16):
-                yield HexRow(offset, demo_data[offset:offset + 16])
+            for offset in range(0, len(self.data), 16):
+                yield HexRow(offset, self.data[offset:offset + 16])
