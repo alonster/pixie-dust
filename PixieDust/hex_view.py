@@ -38,3 +38,11 @@ class HexView(Horizontal):
     def on_hex_grid_position_changed(self, message: "HexGrid.PositionChanged") -> None:
         data_chunk = self.data[message.pos: message.pos + 4]
         self.inspector.update_info(message.pos, data_chunk)
+
+    def save_file(self) -> None:
+        try:
+            with open(self.file_path, 'wb') as f:
+                f.write(self.data)
+            self.notify(f"Saved: {self.file_path}", severity="information")
+        except Exception as e:
+            self.notify(f"Save failed: {e}", severity="error")
