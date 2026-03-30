@@ -197,6 +197,8 @@ class HexGrid(Vertical):
 
     def update_byte(self, new_value: int):
         self.data[self.current_pos] = new_value
+        self.parent.has_unsaved_changes = True
+
         rows = self.query(HexRow)
         if self.current_row < len(rows):
             rows[self.current_row].refresh()
