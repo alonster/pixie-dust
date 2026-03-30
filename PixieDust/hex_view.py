@@ -2,8 +2,8 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal
 from textual.reactive import reactive
 
-from hex_grid import HexGrid
-from data_inspector import Inspector
+from PixieDust.hex_grid import HexGrid
+from PixieDust.data_inspector import Inspector
 
 
 class HexView(Horizontal):
