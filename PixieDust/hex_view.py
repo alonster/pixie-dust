@@ -28,7 +28,6 @@ class HexView(Horizontal):
 
     def action_toggle_edit(self) -> None:
         self.is_editing = not self.is_editing
-        self.grid.is_editing = self.is_editing
 
     def on_mount(self) -> None:
         self.styles.height = "100%"

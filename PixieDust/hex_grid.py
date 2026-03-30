@@ -32,7 +32,7 @@ class HexRow(Static):
 
     def add_selected_style(self, style: str) -> str:
         if self.is_editing:
-            return style + " bold black on yellow blink"
+            return f"bold black on {style} blink"
         return style + " reverse bold"
 
     @staticmethod
@@ -98,6 +98,7 @@ class HexGrid(Vertical):
         Binding("down", "move_down", show=False),
         Binding("left", "move_left", show=False),
         Binding("right", "move_right", show=False),
+        Binding("escape", "exit_edit_mode", show=False),
     ]
 
     def __init__(self, data: memoryview):
@@ -127,6 +128,8 @@ class HexGrid(Vertical):
         return self.current_pos % 16
 
     def on_mount(self) -> None:
+        self.watch(self.parent, "is_editing", self._sync_edit_mode)
+
         self.styles.height = "100%"
         self.styles.padding = (1, 1)
 
@@ -138,7 +141,9 @@ class HexGrid(Vertical):
         self.refresh_selection()
         self.post_message(self.PositionChanged(new_pos))
 
-    def watch_is_editing(self, value: bool) -> None:
+    def _sync_edit_mode(self, new_value: bool) -> None:
+        self.is_editing = new_value
+        self._edit_buffer = ""
         self.refresh_selection()
 
     def refresh_selection(self) -> None:
@@ -148,31 +153,35 @@ class HexGrid(Vertical):
             row.selected_column = self.current_col if is_active_row else -1
             row.is_editing = self.is_editing if is_active_row else False
 
+    def change_current_pos_by(self, relative_offset: int) -> None:
+        self.current_pos += relative_offset
+        self._edit_buffer = ""
+
     def action_move_up(self) -> None:
-        self.current_pos -= 16
+        self.change_current_pos_by(-16)
 
     def action_move_down(self) -> None:
-        self.current_pos += 16
+        self.change_current_pos_by(16)
 
     def action_move_left(self) -> None:
-        self.current_pos -= 1
+        self.change_current_pos_by(-1)
 
     def action_move_right(self) -> None:
-        self.current_pos += 1
+        self.change_current_pos_by(1)
+
+    def action_exit_edit_mode(self) -> None:
+        self.parent.is_editing = False
+        self._edit_buffer = ""
 
     def on_key(self, event: "events.Key") -> None:
         if not self.is_editing:
             return
 
-        key = event.character
-        if key and key.lower() in "0123456789abcdef":
+        character = event.character
+        if character and character.lower() in "0123456789abcdef":
             event.stop()
-            self.handle_hex_input(key.lower())
+            self.handle_hex_input(character.lower())
             return
-
-        self._edit_buffer = ""
-        if event.key == "escape":
-            self.is_editing = False
 
     def handle_hex_input(self, hex_char: str) -> None:
         full_hex = self._edit_buffer + hex_char
