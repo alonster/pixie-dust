@@ -70,6 +70,14 @@ class HexRow(Static):
                 if current_section == Section.Hex:
                     section_text.append(" ")
 
+        padding_needed = 16 - len(self.data)
+        for padding in range(padding_needed):
+            section_text.append("   " if current_section == Section.Hex else " ")
+            if padding_needed - padding == 9:
+                section_text.append("┊", style="white")
+                if current_section == Section.Hex:
+                    section_text.append(" ")
+
         return section_text
 
     def render_hex_section(self, line: Text):
