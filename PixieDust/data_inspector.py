@@ -6,11 +6,11 @@ from textual.widgets import Label, Static
 
 
 class Inspector(Vertical):
-    address_value = 0
-    byte_value = 0
-    bin_value = 0
-    u32_le = 0
-    u32_be = 0
+    address_value = Static()
+    byte_value = Static()
+    bin_value = Static()
+    u32_le = Static()
+    u32_be = Static()
 
     def compose(self) -> ComposeResult:
         yield Label("Data Inspector", id="inspector-title")
@@ -64,7 +64,7 @@ class Inspector(Vertical):
             val.styles.color = "whitesmoke"
             val.styles.padding = (0, 1)
 
-    def update_info(self, pos: int, data_chunk: bytes) -> None:
+    def update_info(self, pos: int, data_chunk: bytearray) -> None:
         self.address_value.update(f"0x{pos:08X}")
 
         if len(data_chunk) >= 1:
