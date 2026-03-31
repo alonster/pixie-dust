@@ -4,7 +4,8 @@ version = "0.1.0"
 description = ""
 requires-python = ">=3.12"
 dependencies = [
-    "textual"
+    "rich>=14.3.3",
+    "textual>=8.2.0",
 ]
 
 [project.scripts]
