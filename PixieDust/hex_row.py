@@ -1,10 +1,17 @@
+from enum import Enum
 from textual.reactive import reactive
 from textual.widgets import Static
 from rich.text import Text
 
 
+class Section(Enum):
+    Hex = "Hex"
+    ASCII = "ASCII"
+
+
 class HexRow(Static):
     selected_column = reactive(-1)
+    active_section = reactive(Section.Hex)
     is_editing = reactive(False)
 
     def __init__(self, offset: int, data: memoryview):
@@ -25,14 +32,14 @@ class HexRow(Static):
 
         return "dark_orange"
 
-    def add_selected_style(self, style: str) -> str:
-        if self.is_editing:
+    def add_selected_style(self, style: str, is_active: bool) -> str:
+        if self.is_editing and is_active:
             return f"bold black on {style} blink"
-        return style + " reverse bold"
+        return style + " on bright_black bold"
 
     @staticmethod
-    def byte_representation(byte: int, is_raw=False) -> str:
-        if is_raw:
+    def byte_representation(byte: int, current_section: Section) -> str:
+        if current_section == Section.Hex:
             return f"{byte:02x}"
 
         if byte == 0x00 or byte == 0xff:
@@ -44,38 +51,40 @@ class HexRow(Static):
 
         return "×"
 
-    def render_section(self, is_hex=False) -> Text:
-        section = Text()
+    def render_section(self, current_section: Section) -> Text:
+        section_text = Text()
+        is_active = (self.active_section == current_section)
+
         for position, byte in enumerate(self.data):
             style = self.byte_color(byte)
-            data_repr = self.byte_representation(byte, is_raw=is_hex)
+            data_repr = self.byte_representation(byte, current_section)
             if position == self.selected_column:
-                style = self.add_selected_style(style)
+                style = self.add_selected_style(style, is_active)
 
-            section.append(data_repr, style=style)
-            if is_hex:
-                section.append(" ")
+            section_text.append(data_repr, style=style)
+            if current_section == Section.Hex:
+                section_text.append(" ")
 
             if position == 7:
-                section.append("┊", style="white")
-                if is_hex:
-                    section.append(" ")
+                section_text.append("┊", style="white")
+                if current_section == Section.Hex:
+                    section_text.append(" ")
 
-        return section
+        return section_text
 
     def render_hex_section(self, line: Text):
-        line.append(self.render_section(is_hex=True))
+        line.append(self.render_section(Section.Hex))
 
     def render_ascii_section(self, line: Text):
-        line.append(self.render_section(is_hex=False))
+        line.append(self.render_section(Section.ASCII))
 
     def render(self) -> Text:
         line = Text()
 
         # Offset
-        line.append("│", style="white")
+        line.append("[", style="white")
         line.append(f"{self.data_offset:08x}", style="bright_black")
-        line.append("│ ", style="white")
+        line.append("] ", style="white")
 
         self.render_hex_section(line)
         line.append("│ ", style="white")
