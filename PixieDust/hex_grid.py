@@ -5,13 +5,13 @@ from textual.containers import Vertical
 from textual.message import Message
 from textual.reactive import reactive
 
-from PixieDust.hex_row import HexRow, Section
+from PixieDust.enums import ActiveSection
+from PixieDust.hex_row import HexRow
 
 
 class HexGrid(Vertical):
     _current_pos = reactive(0)
-    is_editing = reactive(False)
-    active_section = reactive(Section.Hex)
+    active_section = reactive(ActiveSection.NONE)
     _edit_buffer = ""
 
     BINDINGS = [
@@ -20,7 +20,6 @@ class HexGrid(Vertical):
         Binding("left", "move_left", show=False),
         Binding("right", "move_right", show=False),
         Binding("escape", "exit_edit_mode", show=False),
-        Binding("tab", "toggle_section", "Switch Hex/ASCII"),
     ]
 
     def __init__(self, data: memoryview):
@@ -50,7 +49,7 @@ class HexGrid(Vertical):
         return self.current_pos % 16
 
     def on_mount(self) -> None:
-        self.watch(self.parent, "is_editing", self._sync_edit_mode)
+        self.watch(self.parent, "active_section", self._apply_active_section)
 
         self.styles.height = "100%"
         self.styles.padding = (1, 1)
@@ -63,8 +62,8 @@ class HexGrid(Vertical):
         self.refresh_selection()
         self.post_message(self.PositionChanged(new_pos))
 
-    def _sync_edit_mode(self, new_value: bool) -> None:
-        self.is_editing = new_value
+    def _apply_active_section(self, new_value: ActiveSection) -> None:
+        self.active_section = new_value
         self._edit_buffer = ""
         self.refresh_selection()
 
@@ -73,8 +72,7 @@ class HexGrid(Vertical):
         for index, row in enumerate(rows):
             is_active_row = (index == self.current_row)
             row.selected_column = self.current_col if is_active_row else -1
-            row.is_editing = self.is_editing if is_active_row else False
-            row.active_section = self.active_section
+            row.active_section = self.active_section if is_active_row else False
 
     def change_current_pos_by(self, relative_offset: int) -> None:
         self.current_pos += relative_offset
@@ -93,25 +91,16 @@ class HexGrid(Vertical):
         self.change_current_pos_by(1)
 
     def action_exit_edit_mode(self) -> None:
-        self.parent.is_editing = False
+        self.parent.active_section = ActiveSection.NONE
         self._edit_buffer = ""
-
-    def action_toggle_section(self) -> None:
-        if self.active_section == Section.Hex:
-            self.active_section = Section.ASCII
-        elif self.active_section == Section.ASCII:
-            self.active_section = Section.Hex
-
-        self._edit_buffer = ""
-        self.refresh_selection()
 
     def on_key(self, event: "events.Key") -> None:
-        if not self.is_editing:
+        if not self.active_section.is_editable():
             return
 
-        if self.active_section == Section.Hex:
+        if self.active_section == ActiveSection.Hex:
             self._handle_hex_key(event)
-        elif self.active_section == Section.ASCII:
+        elif self.active_section == ActiveSection.ASCII:
             self._handle_ascii_key(event)
 
     def _handle_hex_key(self, event: "events.Key") -> None:

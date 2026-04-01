@@ -64,6 +64,8 @@ class Inspector(Vertical):
             val.styles.color = "whitesmoke"
             val.styles.padding = (0, 1)
 
+        self.can_focus = True
+
     def update_info(self, pos: int, data_chunk: bytearray) -> None:
         self.address_value.update(f"0x{pos:08X}")
 
@@ -80,3 +82,5 @@ class Inspector(Vertical):
         else:
             self.u32_le.update("-")
             self.u32_be.update("-")
+
+        self.refresh()

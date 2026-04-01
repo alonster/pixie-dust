@@ -4,13 +4,18 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal
 from textual.reactive import reactive
 
+from PixieDust.enums import ActiveSection
 from PixieDust.hex_grid import HexGrid
 from PixieDust.data_inspector import Inspector
 
 
 class HexView(Horizontal):
-    is_editing = reactive(False)
+    active_section = reactive(ActiveSection.NONE)
     has_unsaved_changes = reactive(False)
+
+    BINDINGS = [
+        ("tab", "next_section", "Next Section"),
+    ]
 
     def __init__(self, file_path: str):
         super().__init__()
@@ -34,7 +39,29 @@ class HexView(Horizontal):
         yield self.inspector
 
     def action_toggle_edit(self) -> None:
-        self.is_editing = not self.is_editing
+        if self.active_section == ActiveSection.NONE:
+            self.active_section = ActiveSection.Hex
+        else:
+            self.active_section = ActiveSection.NONE
+
+    def action_next_section(self) -> None:
+        if self.active_section == ActiveSection.NONE:
+            return
+
+        if self.active_section == ActiveSection.Hex:
+            self.active_section = ActiveSection.ASCII
+        elif self.active_section == ActiveSection.ASCII:
+            self.active_section = ActiveSection.Inspector
+        elif self.active_section == ActiveSection.Inspector:
+            self.active_section = ActiveSection.Hex
+        self._update_focus()
+
+    def _update_focus(self) -> None:
+        if self.active_section == ActiveSection.Inspector:
+            self.inspector.focus()
+        else:
+            self.grid.focus()
+        self.grid.refresh_selection()
 
     def on_mount(self) -> None:
         self.styles.height = "100%"
@@ -42,6 +69,7 @@ class HexView(Horizontal):
         self.grid.styles.width = "70%"
         self.inspector.styles.width = "30%"
 
+        self._update_focus()
         self.update_title()
 
     def on_hex_grid_position_changed(self, message: "HexGrid.PositionChanged") -> None:
