@@ -17,7 +17,7 @@ class HexRow(Static):
     @staticmethod
     def byte_color(byte: int) -> str:
         if byte == 0x00:
-            return "bright_black"
+            return "white"
         elif byte == 0xff:
             return "bright_red"
         elif 0 < byte < 32 or byte == 0x7f:

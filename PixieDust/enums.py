@@ -7,4 +7,4 @@ class ActiveSection(Enum):
     Inspector = "Inspector"
 
     def is_editable(self):
-        return self.value != ActiveSection.NONE
+        return self != ActiveSection.NONE
