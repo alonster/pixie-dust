@@ -4,6 +4,8 @@ from textual.app import ComposeResult
 from textual.containers import Vertical, Grid
 from textual.widgets import Label, Static
 
+from PixieDust.data_manager import DataManager
+
 
 class Inspector(Vertical):
     address_value = Static()
@@ -11,6 +13,10 @@ class Inspector(Vertical):
     bin_value = Static()
     u32_le = Static()
     u32_be = Static()
+
+    def __init__(self, data_manager: DataManager):
+        super().__init__()
+        self.data_manager = data_manager
 
     def compose(self) -> ComposeResult:
         yield Label("Data Inspector", id="inspector-title")
@@ -66,8 +72,9 @@ class Inspector(Vertical):
 
         self.can_focus = True
 
-    def update_info(self, pos: int, data_chunk: bytearray) -> None:
-        self.address_value.update(f"0x{pos:08X}")
+    def update_info(self, update: DataManager.PositionUpdate) -> None:
+        self.address_value.update(f"0x{update.position:08X}")
+        data_chunk = self.data_manager.get_data()[update.position:update.position + 4]
 
         if len(data_chunk) >= 1:
             byte = data_chunk[0]

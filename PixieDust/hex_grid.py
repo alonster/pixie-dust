@@ -2,15 +2,14 @@ from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
-from textual.message import Message
 from textual.reactive import reactive
 
+from PixieDust.data_manager import DataManager
 from PixieDust.enums import ActiveSection
 from PixieDust.hex_row import HexRow
 
 
 class HexGrid(Vertical):
-    _current_pos = reactive(0)
     active_section = reactive(ActiveSection.NONE)
     _edit_buffer = ""
 
@@ -22,31 +21,9 @@ class HexGrid(Vertical):
         Binding("escape", "exit_edit_mode", show=False),
     ]
 
-    def __init__(self, data: memoryview):
+    def __init__(self, data_manager: DataManager):
         super().__init__()
-        self.data = data
-
-    class PositionChanged(Message):
-        def __init__(self, pos: int):
-            self.pos = pos
-            super().__init__()
-
-    @property
-    def current_pos(self) -> int:
-        return self._current_pos
-
-    @current_pos.setter
-    def current_pos(self, value: int) -> None:
-        max_pos = max(0, (len(self.data)) - 1)
-        self._current_pos = max(0, min(value, max_pos))
-
-    @property
-    def current_row(self) -> int:
-        return self.current_pos // 16
-
-    @property
-    def current_col(self) -> int:
-        return self.current_pos % 16
+        self.data_manager = data_manager
 
     def on_mount(self) -> None:
         self.watch(self.parent, "active_section", self._apply_active_section)
@@ -58,41 +35,32 @@ class HexGrid(Vertical):
         self.focus()
         self.refresh_selection()
 
-    def watch__current_pos(self, new_pos: int) -> None:
-        self.refresh_selection()
-        self.post_message(self.PositionChanged(new_pos))
-
     def _apply_active_section(self, new_value: ActiveSection) -> None:
         self.active_section = new_value
-        self._edit_buffer = ""
         self.refresh_selection()
 
     def refresh_selection(self) -> None:
+        self._edit_buffer = ""
         rows = self.query(HexRow)
         for index, row in enumerate(rows):
-            is_active_row = (index == self.current_row)
-            row.selected_column = self.current_col if is_active_row else -1
+            is_active_row = (index == self.data_manager.current_row)
+            row.selected_column = self.data_manager.current_col if is_active_row else -1
             row.active_section = self.active_section if is_active_row else False
 
-    def change_current_pos_by(self, relative_offset: int) -> None:
-        self.current_pos += relative_offset
-        self._edit_buffer = ""
-
     def action_move_up(self) -> None:
-        self.change_current_pos_by(-16)
+        self.data_manager.move_up()
 
     def action_move_down(self) -> None:
-        self.change_current_pos_by(16)
+        self.data_manager.move_down()
 
     def action_move_left(self) -> None:
-        self.change_current_pos_by(-1)
+        self.data_manager.move_left()
 
     def action_move_right(self) -> None:
-        self.change_current_pos_by(1)
+        self.data_manager.move_right()
 
     def action_exit_edit_mode(self) -> None:
         self.parent.active_section = ActiveSection.NONE
-        self._edit_buffer = ""
 
     def on_key(self, event: "events.Key") -> None:
         if not self.active_section.is_editable():
@@ -113,32 +81,29 @@ class HexGrid(Vertical):
         char = event.character
         if char and len(char) == 1 and char.isprintable():
             event.stop()
-            self.update_byte_and_advance(ord(char))
+            self.data_manager.update_byte_and_advance(ord(char))
 
     def handle_hex_input(self, hex_char: str) -> None:
         full_hex = self._edit_buffer + hex_char
         new_byte_value = int(full_hex, 16)
 
         if not self._edit_buffer:
-            self.update_byte(new_byte_value)
+            self.data_manager.update_byte(new_byte_value)
             self._edit_buffer = hex_char
         else:
             self._edit_buffer = ""
-            self.update_byte_and_advance(new_byte_value)
+            self.data_manager.update_byte_and_advance(new_byte_value)
 
-    def update_byte(self, new_value: int):
-        self.data[self.current_pos] = new_value
-        self.parent.has_unsaved_changes = True
-
+    def update_data(self, data_update: DataManager.DataUpdate):
         rows = self.query(HexRow)
-        if self.current_row < len(rows):
-            rows[self.current_row].refresh()
-
-    def update_byte_and_advance(self, new_value: int):
-        self.update_byte(new_value)
-        self.current_pos += 1
-        self.refresh_selection()
+        if data_update.length == 1:
+            rows[self.data_manager.get_row_for_position(data_update.position)].refresh()
+        else:
+            min_row = self.data_manager.get_row_for_position(data_update.position)
+            max_row = self.data_manager.get_row_for_position(data_update.position + data_update.length)
+            for row_number in range(min_row, max_row + 1):
+                rows[row_number].refresh()
 
     def compose(self) -> ComposeResult:
-        for offset in range(0, len(self.data), 16):
-            yield HexRow(offset, self.data[offset:offset + 16])
+        for offset in range(0, len(self.data_manager.get_data()), 16):
+            yield HexRow(offset, self.data_manager.get_data()[offset:offset + 16])

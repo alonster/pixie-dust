@@ -5,6 +5,7 @@ from textual.containers import Horizontal
 from textual.reactive import reactive
 
 from PixieDust.enums import ActiveSection
+from PixieDust.data_manager import DataManager
 from PixieDust.hex_grid import HexGrid
 from PixieDust.data_inspector import Inspector
 
@@ -20,9 +21,9 @@ class HexView(Horizontal):
     def __init__(self, file_path: str):
         super().__init__()
         self.file_path = file_path
-        self.data = bytearray()
-        self.grid = HexGrid(memoryview(self.data))
-        self.inspector = Inspector()
+        self.data_manager = DataManager(bytearray(b''))
+        self.grid = HexGrid(self.data_manager)
+        self.inspector = Inspector(self.data_manager)
 
     @property
     def file_name(self):
@@ -30,11 +31,9 @@ class HexView(Horizontal):
 
     def compose(self) -> ComposeResult:
         with open(self.file_path, 'rb') as f:
-            self.data = bytearray(f.read())
+            self.data_manager.set_data(bytearray(f.read()))
 
-        self.grid = HexGrid(memoryview(self.data))
-        self.inspector = Inspector()
-
+        yield self.data_manager
         yield self.grid
         yield self.inspector
 
@@ -72,9 +71,14 @@ class HexView(Horizontal):
         self._update_focus()
         self.update_title()
 
-    def on_hex_grid_position_changed(self, message: "HexGrid.PositionChanged") -> None:
-        data_chunk = self.data[message.pos: message.pos + 4]
-        self.inspector.update_info(message.pos, data_chunk)
+    def on_data_manager_position_update(self, message: DataManager.PositionUpdate) -> None:
+        self.grid.refresh_selection()
+        self.inspector.update_info(message)
+
+    def on_data_manager_data_update(self, message: DataManager.DataUpdate) -> None:
+        self.has_unsaved_changes = True
+        self.grid.update_data(message)
+        self.inspector.update_info(message)
 
     def watch_has_unsaved_changes(self, value: bool) -> None:
         self.update_title()
@@ -86,7 +90,7 @@ class HexView(Horizontal):
     def save_file(self) -> None:
         try:
             with open(self.file_path, 'wb') as f:
-                f.write(self.data)
+                f.write(self.data_manager.get_data())
             self.notify(f"Saved: {self.file_path}", severity="information")
             self.has_unsaved_changes = False
         except Exception as e:

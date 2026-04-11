@@ -1,0 +1,80 @@
+from textual.containers import Container
+from textual.message import Message
+from textual.reactive import reactive
+
+
+class DataManager(Container):
+    _current_pos = reactive(0)
+
+    BYTES_IN_ROW = 16
+
+    def __init__(self, data: bytearray):
+        super().__init__()
+        self._data = data
+
+    class PositionUpdate(Message):
+        def __init__(self, position: int):
+            super().__init__()
+            self.position = position
+
+    class DataUpdate(PositionUpdate):
+        def __init__(self, position: int, length: int):
+            super().__init__(position)
+            self.length = length
+
+    def set_data(self, data: bytearray):
+        if not self._data:
+            self._data = data
+            self.current_pos = 0
+
+    def get_data(self) -> memoryview:
+        return memoryview(self._data)
+
+    @property
+    def current_pos(self) -> int:
+        return self._current_pos
+
+    @current_pos.setter
+    def current_pos(self, value: int) -> None:
+        max_pos = max(0, (len(self._data)) - 1)
+        self._current_pos = max(0, min(value, max_pos))
+
+    @property
+    def current_row(self) -> int:
+        return self.get_row_for_position(self.current_pos)
+
+    @property
+    def current_col(self) -> int:
+        return self.get_col_for_position(self.current_pos)
+
+    def get_row_for_position(self, position: int) -> int:
+        return position // self.BYTES_IN_ROW
+
+    def get_col_for_position(self, position: int) -> int:
+        return position % self.BYTES_IN_ROW
+
+    def watch__current_pos(self, new_pos: int) -> None:
+        self.post_message(self.PositionUpdate(new_pos))
+
+    def change_current_pos_by(self, relative_offset: int) -> None:
+        self.current_pos += relative_offset
+
+    def move_up(self) -> None:
+        self.change_current_pos_by(-16)
+
+    def move_down(self) -> None:
+        self.change_current_pos_by(16)
+
+    def move_left(self) -> None:
+        self.change_current_pos_by(-1)
+
+    def move_right(self) -> None:
+        self.change_current_pos_by(1)
+
+    def update_byte(self, new_value: int):
+        self._data[self.current_pos] = new_value
+        self.post_message(self.DataUpdate(self.current_pos, length=1))
+
+    def update_byte_and_advance(self, new_value: int):
+        self.update_byte(new_value)
+        self.current_pos += 1
