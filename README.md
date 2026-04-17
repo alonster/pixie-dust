@@ -1,5 +1,9 @@
 # PixieDust
 
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
+[![Framework](https://img.shields.io/badge/Framework-Textual-ff4757.svg)](https://textual.textualize.io/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
+
 `pixie-dust` is a lightweight, interactive Hex Editor
 built with the [Textualize/textual](https://github.com/Textualize/textual) framework
 and inspired by [`hexyl`](https://github.com/sharkdp/hexyl).
