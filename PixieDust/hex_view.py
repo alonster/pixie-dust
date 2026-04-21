@@ -7,7 +7,7 @@ from textual.reactive import reactive
 from PixieDust.enums import ActiveSection
 from PixieDust.data_manager import DataManager
 from PixieDust.hex_grid import HexGrid
-from PixieDust.data_inspector import Inspector
+from PixieDust.inspector.inspector import Inspector
 
 
 class HexView(Horizontal):
@@ -16,6 +16,7 @@ class HexView(Horizontal):
 
     BINDINGS = [
         ("tab", "next_section", "Next Section"),
+        ("m", "toggle_mode", "Toggle Mode"),
     ]
 
     def __init__(self, file_path: str):
@@ -42,6 +43,9 @@ class HexView(Horizontal):
             self.active_section = ActiveSection.Hex
         else:
             self.active_section = ActiveSection.NONE
+
+    def action_toggle_mode(self) -> None:
+        self.inspector.action_toggle_mode()
 
     def action_next_section(self) -> None:
         if self.active_section == ActiveSection.NONE:

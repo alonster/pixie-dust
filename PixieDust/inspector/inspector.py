@@ -1,0 +1,42 @@
+from textual.app import ComposeResult
+from textual.containers import Vertical
+from textual.widgets import TabbedContent, TabPane, Static
+
+from PixieDust.data_manager import DataManager
+from PixieDust.inspector.mini import MiniInspector
+from PixieDust.inspector.raw import RawInspector
+from PixieDust.styles import Theme
+
+
+class Inspector(Vertical):
+    def __init__(self, data_manager: DataManager):
+        super().__init__()
+        self.data_manager = data_manager
+
+        self.mini = MiniInspector()
+        self.tabs = TabbedContent()
+        self.raw_view = RawInspector(self.data_manager)
+        self.schema_view = Static("Schema View (Coming Soon)")
+
+    def compose(self) -> ComposeResult:
+        yield self.mini
+        with self.tabs:
+            with TabPane("Data Inspector", id="raw"):
+                yield self.raw_view
+            with TabPane("Schema View", id="schema"):
+                yield self.schema_view
+
+    def action_toggle_mode(self) -> None:
+        self.tabs.active = "schema" if self.tabs.active == "raw" else "raw"
+
+    def on_mount(self) -> None:
+        self.styles.background = Theme.BG_INSPECTOR
+        self.styles.border_left = ("tall", Theme.ACCENT_PURPLE)
+
+        self.can_focus = True
+
+    def update_info(self, update: DataManager.PositionUpdate) -> None:
+        data = self.data_manager.get_data()[update.position:update.position + 8]
+
+        self.raw_view.update_info(update)
+        self.mini.update_field("Raw Byte", f"0x{data[0]:02X} | {data[0]}" if data else "-", update.position)
