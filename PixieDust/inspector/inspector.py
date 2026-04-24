@@ -5,7 +5,7 @@ from textual.widgets import TabbedContent, TabPane, Static
 from PixieDust.data_manager import DataManager
 from PixieDust.inspector.mini import MiniInspector
 from PixieDust.inspector.raw import RawInspector
-from PixieDust.styles import Theme
+from PixieDust.styles import Color
 
 
 class Inspector(Vertical):
@@ -30,8 +30,8 @@ class Inspector(Vertical):
         self.tabs.active = "schema" if self.tabs.active == "raw" else "raw"
 
     def on_mount(self) -> None:
-        self.styles.background = Theme.BG_INSPECTOR
-        self.styles.border_left = ("tall", Theme.ACCENT_PURPLE)
+        self.styles.background = Color.dark_grey
+        self.styles.border_left = ("tall", Color.mediumpurple)
 
         self.can_focus = True
 

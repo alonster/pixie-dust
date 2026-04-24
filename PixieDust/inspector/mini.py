@@ -2,7 +2,7 @@ from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widgets import Label
 
-from PixieDust.styles import Theme
+from PixieDust.styles import Color
 
 
 class MiniInspector(Vertical):
@@ -20,16 +20,16 @@ class MiniInspector(Vertical):
     def on_mount(self) -> None:
         self.styles.height = 6
         self.styles.padding = (1, 1)
-        self.styles.background = Theme.BG_INSPECTOR
-        self.styles.border_bottom = ("solid", Theme.BORDER_DARK)
+        self.styles.background = Color.dark_grey
+        self.styles.border_bottom = ("solid", Color.black)
 
         self.label_name.styles.text_style = "bold"
-        self.label_name.styles.color = Theme.ACCENT_ORANGE
+        self.label_name.styles.color = Color.orange
 
-        self.label_offset.styles.color = Theme.TEXT_MUTED
+        self.label_offset.styles.color = Color.grey
 
         self.label_value.styles.text_style = "bold"
-        self.label_value.styles.color = Theme.TEXT_PRIMARY
+        self.label_value.styles.color = Color.white
 
     def update_field(self, name: str, value: str, offset: int):
         self.label_name.update(f"Field: {name}")

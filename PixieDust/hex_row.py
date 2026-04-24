@@ -3,6 +3,7 @@ from textual.widgets import Static
 from rich.text import Text
 
 from PixieDust.enums import ActiveSection
+from PixieDust.styles import Color
 
 
 class HexRow(Static):
@@ -17,20 +18,20 @@ class HexRow(Static):
     @staticmethod
     def byte_color(byte: int) -> str:
         if byte == 0x00:
-            return "white"
+            return Color.white
         elif byte == 0xff:
-            return "bright_red"
+            return Color.bright_red
         elif 0 < byte < 32 or byte == 0x7f:
-            return "bright_green"
+            return Color.bright_green
         elif 32 <= byte <= 126:
-            return "cyan"
+            return Color.cyan
 
-        return "dark_orange"
+        return Color.dark_orange
 
     def add_selected_style(self, style: str, is_active: bool) -> str:
         if self.active_section.is_editable() and is_active:
-            return f"bold black on {style} blink"
-        return style + " on bright_black bold"
+            return f"bold {Color.black} on {style} blink"
+        return f"{style} on {Color.bright_black} bold"
 
     @staticmethod
     def byte_representation(byte: int, current_section: ActiveSection) -> str:
@@ -61,7 +62,7 @@ class HexRow(Static):
                 section_text.append(" ")
 
             if position == 7:
-                section_text.append("┊", style="white")
+                section_text.append("┊", style=Color.white)
                 if current_section == ActiveSection.Hex:
                     section_text.append(" ")
 
@@ -69,7 +70,7 @@ class HexRow(Static):
         for padding in range(padding_needed):
             section_text.append("   " if current_section == ActiveSection.Hex else " ")
             if padding_needed - padding == 9:
-                section_text.append("┊", style="white")
+                section_text.append("┊", style=Color.white)
                 if current_section == ActiveSection.Hex:
                     section_text.append(" ")
 
@@ -85,11 +86,11 @@ class HexRow(Static):
         line = Text()
 
         # Offset
-        line.append("[", style="white")
-        line.append(f"{self.data_offset:08x}", style="bright_black")
-        line.append("] ", style="white")
+        line.append("[", style=Color.white)
+        line.append(f"{self.data_offset:08x}", style=Color.bright_black)
+        line.append("] ", style=Color.white)
 
         self.render_hex_section(line)
-        line.append("│ ", style="white")
+        line.append("│ ", style=Color.white)
         self.render_ascii_section(line)
         return line

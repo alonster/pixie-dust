@@ -5,7 +5,7 @@ from textual.containers import Vertical, Grid
 from textual.widgets import Label, Static
 
 from PixieDust.data_manager import DataManager
-from PixieDust.styles import Theme
+from PixieDust.styles import Color
 
 
 class RawInspector(Vertical):
@@ -43,13 +43,13 @@ class RawInspector(Vertical):
         self.grid.styles.height = "auto"
 
         for label in self.rows.keys():
-            label.styles.color = Theme.ACCENT_ORANGE
+            label.styles.color = Color.orange
             label.styles.content_align = ("right", "middle")
 
         for val in self.rows.values():
-            val.styles.background = Theme.BG_VALUE
-            val.styles.color = Theme.TEXT_PRIMARY
-            val.styles.border_left = ("solid", Theme.ACCENT_PURPLE)
+            val.styles.background = Color.deep_grey
+            val.styles.color = Color.white
+            val.styles.border_left = ("solid", Color.mediumpurple)
             val.styles.padding = (0, 1)
 
     def update_info(self, update: DataManager.PositionUpdate) -> None:

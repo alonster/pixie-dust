@@ -1,14 +1,17 @@
-class Theme:
-    BG_INSPECTOR = "#1A1A1A"
-    BG_VALUE = "#252525"
+class Color:
+    # Custom Hex for depth
+    black = "#121212"
+    dark_grey = "#1A1A1A"
+    deep_grey = "#252525"
 
-    # Accents
-    ACCENT_PURPLE = "#7D5FFF"
-    ACCENT_ORANGE = "#FF9F43"
+    # Standard names for Grid, Bytes, and Accents
+    white = "white"
+    grey = "grey"
+    bright_black = "bright_black"
 
-    # Text Colors
-    TEXT_PRIMARY = "#E0E0E0"
-    TEXT_MUTED = "#888888"
-
-    # Borders & Dividers
-    BORDER_DARK = "#333333"
+    mediumpurple = "mediumpurple"
+    bright_red = "bright_red"
+    bright_green = "bright_green"
+    cyan = "cyan"
+    orange = "orange"
+    dark_orange = "dark_orange"
