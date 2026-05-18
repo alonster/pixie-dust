@@ -2,7 +2,7 @@
 name = "pixiedust"
 version = "0.1.0"
 description = ""
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
     "rich>=14.3.3",
     "textual>=8.2.0",
