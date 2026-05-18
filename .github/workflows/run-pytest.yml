@@ -1,0 +1,25 @@
+name: Run pytest
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+    - uses: actions/checkout@v5
+    - name: Install the latest version of uv and set the python version
+      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Test with python ${{ matrix.python-version }}
+      run: uv run --frozen pytest
