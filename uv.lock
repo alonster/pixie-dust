@@ -188,7 +188,7 @@ wheels = [
 
 [[package]]
 name = "rich"
-version = "14.3.4"
+version = "14.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown-it-py" },
