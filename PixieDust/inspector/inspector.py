@@ -1,10 +1,11 @@
 from textual.app import ComposeResult
 from textual.containers import Vertical
-from textual.widgets import TabbedContent, TabPane, Static
+from textual.widgets import TabbedContent, TabPane
 
 from PixieDust.data_manager import DataManager
 from PixieDust.inspector.mini import MiniInspector
 from PixieDust.inspector.raw import RawInspector
+from PixieDust.inspector.schema_view import SchemaView
 from PixieDust.styles import Color
 
 
@@ -16,7 +17,7 @@ class Inspector(Vertical):
         self.mini = MiniInspector()
         self.tabs = TabbedContent()
         self.raw_view = RawInspector(self.data_manager)
-        self.schema_view = Static("Schema View (Coming Soon)")
+        self.schema_view = SchemaView()
 
     def compose(self) -> ComposeResult:
         yield self.mini
@@ -36,7 +37,7 @@ class Inspector(Vertical):
         self.can_focus = True
 
     def update_info(self, update: DataManager.PositionUpdate) -> None:
-        data = self.data_manager.get_data()[update.position:update.position + 8]
-
+        full_data = self.data_manager.get_data()
         self.raw_view.update_info(update)
-        self.mini.update_field("Raw Byte", f"0x{data[0]:02X} | {data[0]}" if data else "-", update.position)
+        active_field = self.schema_view.update_info(full_data, update.position)
+        self.mini.update_field(active_field.name, active_field.value, active_field.offset)

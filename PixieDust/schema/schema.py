@@ -22,6 +22,8 @@ class Field:
     name: str
     type: str
     is_little_endian: bool = True
+    offset: int = 0
+    value: Any = None
 
     @property
     def struct_format(self) -> str:
@@ -39,15 +41,17 @@ class Schema:
     name: str
     fields: List[Field] = field(default_factory=list)
 
-    def parse(self, data: bytes) -> Dict[str, Any]:
-        results = {}
-        offset = 0
+    def __post_init__(self):
+        current_offset = 0
         for f in self.fields:
-            if offset + f.size <= len(data):
-                val = struct.unpack_from(f.struct_format, data, offset)[0]
-                results[f.name] = val
-                offset += f.size
+            f.offset = current_offset
+            current_offset += f.size
+
+    def parse(self, data: bytes | memoryview):
+        for f in self.fields:
+            if f.offset + f.size <= len(data):
+                val = struct.unpack_from(f.struct_format, data, f.offset)[0]
+                f.value = val
             else:
                 # Not enough data for this field
-                results[f.name] = None
-        return results
+                f.value = None
