@@ -1,4 +1,4 @@
-name: Run pytest
+name: Setup uv package & Run pytest
 
 on:
   push:
@@ -22,4 +22,4 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Test with python ${{ matrix.python-version }}
-      run: uv run --frozen pytest
+      run: uv run --locked pytest

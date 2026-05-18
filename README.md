@@ -16,7 +16,7 @@ In order to install `pixie-dust` from source:
 ```bash
 # Clone the repository
 git clone https://github.com/alonster/pixie-dust.git
-cd PixieDust
+cd pixie-dust
 
 # Sync dependencies ('--no-dev' is optional)
 uv sync --no-dev
@@ -32,19 +32,17 @@ uv pip install --editable .
 To run `pixie-dust`, simply run:
 
 ```bash
-pixie-dust
+uv run pixie-dust
 ```
 
-## Tests
+## Develop and Test
 
 If you want to test the app or a new feature, you can run:
 
 ```bash
-# Sync dependencies (including development-related dependencies)
-uv sync
-
-# Run tests
 uv run pytest
 ```
+
+Note: `uv` will automatically install development-related dependencies.
 
 Feel free to add more tests under the `test/` directory.
