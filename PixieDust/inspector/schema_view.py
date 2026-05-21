@@ -14,8 +14,9 @@ class SchemaView(Vertical):
         self.schema = schema or Schema("Demo Schema", [
             Field("Magic", "uint32"),
             Field("Version", "uint16"),
-            Field("Flags", "uint16"),
-            Field("Data Offset", "uint32"),
+            Field("Flags", "uint8"),
+            Field("Negative", "int8"),
+            Field("Offset", "uint32"),
             Field("Size", "uint32"),
         ])
         self.title = Label(f" {self.schema.name}")
@@ -53,17 +54,7 @@ class SchemaView(Vertical):
             if is_active:
                 active_field = field
 
-            # Update value text
-            if field.value is None:
-                val_str = "??"
-            elif isinstance(field.value, int):
-                val_str = f"{field.value} (0x{field.value:X})"
-            elif isinstance(field.value, float):
-                val_str = f"{field.value:.4f}"
-            else:
-                val_str = str(field.value)
-
-            widget.update(val_str)
+            widget.update(field.format())
 
             # Update highlighting
             if is_active:

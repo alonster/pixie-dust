@@ -1,8 +1,8 @@
-from typing import Any
 from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widgets import Label
 
+from PixieDust.schema.schema import Field
 from PixieDust.styles import Color
 
 
@@ -32,17 +32,7 @@ class MiniInspector(Vertical):
         self.label_value.styles.text_style = "bold"
         self.label_value.styles.color = Color.white
 
-    def update_field(self, name: str, value: Any, offset: int):
-        self.label_name.update(f"Field: {name}")
-        self.label_offset.update(f"Address:  0x{offset:08X}")
-        
-        if value is None:
-            val_str = "-"
-        elif isinstance(value, int):
-            val_str = f"0x{value:02X} | {value}"
-        elif isinstance(value, float):
-            val_str = f"{value:.4f}"
-        else:
-            val_str = str(value)
-            
-        self.label_value.update(f"Value: {val_str}")
+    def update_field(self, field: Field):
+        self.label_name.update(f"Field: {field.name}")
+        self.label_offset.update(f"Address:  0x{field.offset:08X}")
+        self.label_value.update(f"Value: {field.format()}")

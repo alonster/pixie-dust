@@ -40,4 +40,4 @@ class Inspector(Vertical):
         full_data = self.data_manager.get_data()
         self.raw_view.update_info(update)
         active_field = self.schema_view.update_info(full_data, update.position)
-        self.mini.update_field(active_field.name, active_field.value, active_field.offset)
+        self.mini.update_field(active_field)

@@ -35,6 +35,23 @@ class Field:
     def size(self) -> int:
         return struct.calcsize(self.struct_format)
 
+    def format(self) -> str:
+        if self.value is None:
+            return "-"
+
+        if isinstance(self.value, int):
+            if self.type.lower() in ("int8", "int16", "int32", "int64"):
+                return f"{self.value}"
+            elif self.type.lower() == "uint8":
+                return f"{self.value} | 0x{self.value:02X}"
+
+            return f"{self.value} | 0x{self.value:X}"
+
+        if isinstance(self.value, float):
+            return f"{self.value:.4f}"
+
+        return str(self.value)
+
 
 @dataclass
 class Schema:
