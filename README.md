@@ -1,6 +1,6 @@
 # PixieDust
 
-[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![Framework](https://img.shields.io/badge/Framework-Textual-ff4757.svg)](https://textual.textualize.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 

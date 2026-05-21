@@ -1,6 +1,6 @@
 import struct
 from dataclasses import dataclass, field
-from typing import List, Any, Dict
+from typing import List, Any
 
 
 TYPE_MAP = {

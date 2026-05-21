@@ -69,8 +69,8 @@ class HexView(Horizontal):
     def on_mount(self) -> None:
         self.styles.height = "100%"
         self.styles.width = "100%"
-        self.grid.styles.width = "70%"
-        self.inspector.styles.width = "30%"
+        self.grid.styles.width = 82
+        self.inspector.styles.width = "100%"
 
         self._update_focus()
         self.update_title()
