@@ -1,8 +1,9 @@
 from textual.app import ComposeResult
-from textual.containers import Vertical, Grid, VerticalScroll
+from textual.containers import Vertical, VerticalScroll
 from textual.widgets import Label, Static
 
 from PixieDust.schema.schema import Schema, Field
+from PixieDust.inspector.grid import KeyValueGrid
 from PixieDust.styles import Color
 
 
@@ -23,14 +24,12 @@ class SchemaView(Vertical):
     def compose(self) -> ComposeResult:
         yield self.title
         with VerticalScroll():
-            with Grid(id="fields-grid") as grid:
+            with KeyValueGrid() as grid:
                 self.grid = grid
                 for field in self.schema.fields:
-                    label = Label(f"{field.name}:")
                     value_static = Static("-")
                     self.field_widgets.append(value_static)
-                    yield label
-                    yield value_static
+                    yield from grid.add_pair(field.name, value_static)
 
     def on_mount(self) -> None:
         self._apply_styles()
@@ -41,23 +40,6 @@ class SchemaView(Vertical):
         self.title.styles.text_style = "bold"
         self.title.styles.padding = (0, 1)
         self.title.styles.margin = (0, 0, 1, 0)
-
-        self.grid.styles.padding = (0, 1)
-        self.grid.styles.grid_size_columns = 2
-        self.grid.styles.grid_columns = "1fr 1fr"
-        self.grid.styles.grid_gutter_vertical = 1
-        self.grid.styles.grid_gutter_horizontal = 1
-        self.grid.styles.height = "auto"
-
-        for child in self.grid.children:
-            if isinstance(child, Label):
-                child.styles.color = Color.orange
-                child.styles.content_align = ("right", "middle")
-            elif isinstance(child, Static):
-                child.styles.background = Color.deep_grey
-                child.styles.color = Color.white
-                child.styles.border_left = ("solid", Color.mediumpurple)
-                child.styles.padding = (0, 1)
 
     def update_info(self, data: memoryview, current_position: int) -> Field:
         active_field = Field("Raw Byte", "uint8", offset=current_position, value=data[current_position])

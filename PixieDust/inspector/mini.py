@@ -1,3 +1,4 @@
+from typing import Any
 from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widgets import Label
@@ -31,7 +32,17 @@ class MiniInspector(Vertical):
         self.label_value.styles.text_style = "bold"
         self.label_value.styles.color = Color.white
 
-    def update_field(self, name: str, value: str, offset: int):
+    def update_field(self, name: str, value: Any, offset: int):
         self.label_name.update(f"Field: {name}")
         self.label_offset.update(f"Address:  0x{offset:08X}")
-        self.label_value.update(f"Value: {value}")
+        
+        if value is None:
+            val_str = "-"
+        elif isinstance(value, int):
+            val_str = f"0x{value:02X} | {value}"
+        elif isinstance(value, float):
+            val_str = f"{value:.4f}"
+        else:
+            val_str = str(value)
+            
+        self.label_value.update(f"Value: {val_str}")
