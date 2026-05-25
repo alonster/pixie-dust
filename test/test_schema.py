@@ -56,6 +56,30 @@ class TestSchemaParse:
         assert schema.fields[0].value == 5
 
     @staticmethod
+    def test_int8():
+        schema = Schema(name="test", fields=[
+            Field("A", "int8")
+        ])
+
+        data = b"\x05"
+        schema.parse(data)
+
+        assert schema.fields[0].name == "A"
+        assert schema.fields[0].value == 5
+
+    @staticmethod
+    def test_int8_negative():
+        schema = Schema(name="test", fields=[
+            Field("A", "int8")
+        ])
+
+        data = b"\xA0"
+        schema.parse(data)
+
+        assert schema.fields[0].name == "A"
+        assert schema.fields[0].value == 0xA0 - 256
+
+    @staticmethod
     def test_uint32_with_not_enough_data():
         schema = Schema(name="test", fields=[
             Field("A", "uint32"),
