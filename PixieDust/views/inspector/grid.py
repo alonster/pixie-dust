@@ -1,7 +1,8 @@
 from textual.app import ComposeResult
 from textual.containers import Grid
 from textual.widgets import Label, Static
-from PixieDust.styles import Color
+
+from PixieDust.utils.styles import Color
 
 class KeyValueGrid(Grid):
     def on_mount(self) -> None:

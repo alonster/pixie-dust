@@ -2,8 +2,8 @@ from textual.reactive import reactive
 from textual.widgets import Static
 from rich.text import Text
 
-from PixieDust.enums import ActiveSection
-from PixieDust.styles import Color
+from PixieDust.utils.enums import ActiveSection
+from PixieDust.utils.styles import Color
 
 
 class HexRow(Static):

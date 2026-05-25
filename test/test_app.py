@@ -1,6 +1,6 @@
 import pytest
 
-from PixieDust.enums import ActiveSection
+from PixieDust.utils.enums import ActiveSection
 from test.utils import app
 
 

@@ -4,9 +4,9 @@ from textual.binding import Binding
 from textual.containers import Vertical
 from textual.reactive import reactive
 
-from PixieDust.data_manager import DataManager
-from PixieDust.enums import ActiveSection
-from PixieDust.hex_row import HexRow
+from PixieDust.utils.data_manager import DataManager
+from PixieDust.utils.enums import ActiveSection
+from PixieDust.views.hex_row import HexRow
 
 
 class HexGrid(Vertical):

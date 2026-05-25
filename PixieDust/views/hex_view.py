@@ -4,10 +4,10 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal
 from textual.reactive import reactive
 
-from PixieDust.enums import ActiveSection
-from PixieDust.data_manager import DataManager
-from PixieDust.hex_grid import HexGrid
-from PixieDust.inspector.inspector import Inspector
+from PixieDust.utils.enums import ActiveSection
+from PixieDust.utils.data_manager import DataManager
+from PixieDust.views.hex_grid import HexGrid
+from PixieDust.views.inspector.inspector import Inspector
 
 
 class HexView(Horizontal):

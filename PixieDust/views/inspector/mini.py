@@ -2,8 +2,8 @@ from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widgets import Label
 
-from PixieDust.schema.schema import Field
-from PixieDust.styles import Color
+from PixieDust.utils.schema import Field
+from PixieDust.utils.styles import Color
 
 
 class MiniInspector(Vertical):

@@ -1,11 +1,11 @@
 import struct
 
 from textual.app import ComposeResult
-from textual.containers import Vertical, Grid
-from textual.widgets import Label, Static
+from textual.containers import Vertical
+from textual.widgets import Static
 
-from PixieDust.data_manager import DataManager
-from PixieDust.inspector.grid import KeyValueGrid
+from PixieDust.utils.data_manager import DataManager
+from PixieDust.views.inspector.grid import KeyValueGrid
 
 class RawInspector(Vertical):
     def __init__(self, data_manager: DataManager):

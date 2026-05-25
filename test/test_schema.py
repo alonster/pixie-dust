@@ -1,4 +1,4 @@
-from PixieDust.schema.schema import Field, Schema
+from PixieDust.utils.schema import Field, Schema
 
 
 class TestFieldSize:

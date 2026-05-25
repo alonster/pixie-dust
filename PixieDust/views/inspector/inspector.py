@@ -2,11 +2,11 @@ from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widgets import TabbedContent, TabPane
 
-from PixieDust.data_manager import DataManager
-from PixieDust.inspector.mini import MiniInspector
-from PixieDust.inspector.raw import RawInspector
-from PixieDust.inspector.schema_view import SchemaView
-from PixieDust.styles import Color
+from PixieDust.utils.data_manager import DataManager
+from PixieDust.views.inspector.mini import MiniInspector
+from PixieDust.views.inspector.raw import RawInspector
+from PixieDust.views.inspector.schema_view import SchemaView
+from PixieDust.utils.styles import Color
 
 
 class Inspector(Vertical):

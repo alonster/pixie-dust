@@ -1,8 +1,8 @@
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer
 
-from PixieDust.hex_view import HexView
-from PixieDust.quit_screen import QuitScreen
+from PixieDust.views.hex_view import HexView
+from PixieDust.views.quit_screen import QuitScreen
 
 
 class PixieDust(App):

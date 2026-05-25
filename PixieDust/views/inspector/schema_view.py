@@ -2,9 +2,9 @@ from textual.app import ComposeResult
 from textual.containers import Vertical, VerticalScroll
 from textual.widgets import Label, Static
 
-from PixieDust.schema.schema import Schema, Field
-from PixieDust.inspector.grid import KeyValueGrid
-from PixieDust.styles import Color
+from PixieDust.utils.schema import Schema, Field
+from PixieDust.views.inspector.grid import KeyValueGrid
+from PixieDust.utils.styles import Color
 
 
 class SchemaView(Vertical):
