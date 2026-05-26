@@ -13,11 +13,11 @@ class PixieDust(App):
         ("ctrl+s", "save", "Save"),
     ]
 
-    hex_view = HexView('')
+    hex_view = HexView()
 
     def compose(self) -> ComposeResult:
         yield Header()
-        self.hex_view = HexView(file_path='demo.bin')
+        self.hex_view = HexView()
         yield self.hex_view
         yield Footer()
 

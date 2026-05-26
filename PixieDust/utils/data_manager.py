@@ -2,15 +2,14 @@ from textual.containers import Container
 from textual.message import Message
 from textual.reactive import reactive
 
+from PixieDust.utils.file_manager import FileManager
+
 
 class DataManager(Container):
     _current_pos = reactive(0)
+    _data = bytearray(b'')
 
     BYTES_IN_ROW = 16
-
-    def __init__(self, data: bytearray):
-        super().__init__()
-        self._data = data
 
     class PositionUpdate(Message):
         def __init__(self, position: int):
@@ -22,10 +21,13 @@ class DataManager(Container):
             super().__init__(position)
             self.length = length
 
-    def set_data(self, data: bytearray):
+    def load_data_from_file(self):
         if not self._data:
-            self._data = data
+            self._data = FileManager.read_data_from_file()
             self.current_pos = 0
+
+    def save_data_to_file(self):
+        FileManager.save_data_to_file(self._data)
 
     def get_data(self) -> memoryview:
         return memoryview(self._data)
