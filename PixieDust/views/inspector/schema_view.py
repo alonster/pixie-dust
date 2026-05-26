@@ -8,7 +8,7 @@ from PixieDust.utils.styles import Color
 
 
 class SchemaView(Vertical):
-    def __init__(self, schema: Schema = None):
+    def __init__(self, schema: Schema | None = None):
         super().__init__()
         # Placeholder demo schema
         self.schema = schema or Schema("Demo Schema", [
@@ -20,6 +20,7 @@ class SchemaView(Vertical):
             Field("Size", "uint32"),
         ])
         self.title = Label(f" {self.schema.name}")
+        self.grid = None
         self.field_widgets = []
 
     def compose(self) -> ComposeResult:

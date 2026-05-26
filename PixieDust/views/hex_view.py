@@ -78,10 +78,10 @@ class HexView(Horizontal):
         self.inspector.update_info(message)
 
     def watch_has_unsaved_changes(self, value: bool) -> None:
-        self.update_title()
+        self.update_title(value)
 
-    def update_title(self) -> None:
-        indicator = " *" if self.has_unsaved_changes else ""
+    def update_title(self, has_unsaved_changes: bool = False) -> None:
+        indicator = " *" if has_unsaved_changes else ""
         self.app.title = f"PixieDust - {FileManager.get_file_name()}{indicator}"
 
     def save_file(self) -> None:

@@ -3,6 +3,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 from textual.containers import Horizontal, Vertical
 
+
 class QuitScreen(ModalScreen[bool]):
     def __init__(self, message: str):
         super().__init__()
@@ -46,3 +47,13 @@ class QuitScreen(ModalScreen[bool]):
             self.dismiss(True)
         else:
             self.dismiss(False)
+
+
+class UnsavedQuitScreen(QuitScreen):
+    def __init__(self):
+        super().__init__("⚠️  UNSAVED CHANGES!\nYou'll lose your work. Are you sure you want to quit?")
+
+
+class EditingQuitScreen(QuitScreen):
+    def __init__(self):
+        super().__init__("📝 STILL EDITING!\nYou are in Edit Mode. Are you sure you want to quit?")

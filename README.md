@@ -32,7 +32,7 @@ uv pip install --editable .
 To run `pixie-dust`, simply run:
 
 ```bash
-uv run pixie-dust
+uv run pixie-dust demo.bin
 ```
 
 ## Develop and Test

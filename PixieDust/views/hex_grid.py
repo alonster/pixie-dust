@@ -26,7 +26,9 @@ class HexGrid(Vertical):
         self.data_manager = data_manager
 
     def on_mount(self) -> None:
-        self.watch(self.parent, "active_section", self._apply_active_section)
+        dom_parent = self.parent
+        if dom_parent is not None:
+            self.watch(dom_parent, "active_section", self._apply_active_section)
 
         self.styles.height = "100%"
         self.styles.padding = (1, 1)
@@ -45,7 +47,7 @@ class HexGrid(Vertical):
         for index, row in enumerate(rows):
             is_active_row = (index == self.data_manager.current_row)
             row.selected_column = self.data_manager.current_col if is_active_row else -1
-            row.active_section = self.active_section if is_active_row else False
+            row.active_section = self.active_section if is_active_row else ActiveSection.NONE
 
     def action_move_up(self) -> None:
         self.data_manager.move_up()
@@ -60,7 +62,8 @@ class HexGrid(Vertical):
         self.data_manager.move_right()
 
     def action_exit_edit_mode(self) -> None:
-        self.parent.active_section = ActiveSection.NONE
+        if self.parent is not None:
+            setattr(self.parent, "active_section", ActiveSection.NONE)
 
     def on_key(self, event: "events.Key") -> None:
         if not self.active_section.is_editable():
