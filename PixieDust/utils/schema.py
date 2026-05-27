@@ -33,6 +33,9 @@ class Field:
 
     @property
     def size(self) -> int:
+        if self.type.lower().startswith("string"):
+            return int(self.type.lower().replace("string", ""))
+
         return struct.calcsize(self.struct_format)
 
     def format(self) -> str:
@@ -50,7 +53,18 @@ class Field:
         if isinstance(self.value, float):
             return f"{self.value:.4f}"
 
-        return str(self.value)
+        return str(f"'{self.value}'")
+
+    def set_value(self, data: bytes | memoryview):
+        if self.offset + self.size <= len(data):
+            if self.type.lower().startswith("string"):
+                self.value = str(data[self.offset:self.offset + self.size], encoding="ascii", errors="replace")
+            else:
+                value = struct.unpack_from(self.struct_format, data, self.offset)[0]
+                self.value = value
+        else:
+            # Not enough data for this field
+            self.value = None
 
 
 @dataclass
@@ -66,9 +80,4 @@ class Schema:
 
     def parse(self, data: bytes | memoryview):
         for f in self.fields:
-            if f.offset + f.size <= len(data):
-                val = struct.unpack_from(f.struct_format, data, f.offset)[0]
-                f.value = val
-            else:
-                # Not enough data for this field
-                f.value = None
+            f.set_value(data)

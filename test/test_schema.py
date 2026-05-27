@@ -12,6 +12,11 @@ class TestFieldSize:
         field = Field("A", "int8")
         assert field.size == 1
 
+    @staticmethod
+    def test_string3():
+        field = Field("A", "string3")
+        assert field.size == 3
+
 
 class TestSchemaParse:
     @staticmethod
@@ -80,6 +85,18 @@ class TestSchemaParse:
         assert schema.fields[0].value == 0xA0 - 256
 
     @staticmethod
+    def test_string3():
+        schema = Schema(name="test", fields=[
+            Field("A", "string3")
+        ])
+
+        data = b"\x41\x62\x21"
+        schema.parse(data)
+
+        assert schema.fields[0].name == "A"
+        assert schema.fields[0].value == "Ab!"
+
+    @staticmethod
     def test_uint32_with_not_enough_data():
         schema = Schema(name="test", fields=[
             Field("A", "uint32"),
@@ -138,6 +155,11 @@ class TestFieldFormat:
     def test_double():
         f = Field("Double", "double", value=3.14159)
         assert f.format() == "3.1416"
+
+    @staticmethod
+    def test_string3():
+        f = Field("String", "string3", value="Ab!")
+        assert f.format() == "'Ab!'"
 
     @staticmethod
     def test_none():
