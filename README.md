@@ -9,6 +9,8 @@ built with the [Textualize/textual](https://github.com/Textualize/textual) frame
 and inspired by [`hexyl`](https://github.com/sharkdp/hexyl).
 It’s designed for low-level data analysis and quick binary prototyping directly from your favorite terminal.
 
+![preview](https://github.com/user-attachments/assets/df110590-09e4-45f4-aea4-50fc7475319f)
+
 ## Installation
 
 In order to install `pixie-dust` from source:
