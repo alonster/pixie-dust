@@ -1,7 +1,6 @@
 import pytest
 
 from PixieDust.utils.enums import ActiveSection
-from test.utils import app
 
 
 @pytest.mark.asyncio

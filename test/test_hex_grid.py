@@ -1,7 +1,5 @@
 import pytest
 
-from test.utils import app
-
 
 @pytest.mark.asyncio
 async def test_navigation_updates_position(app):
