@@ -21,14 +21,15 @@ class BaseInspectorView(Vertical):
         if any(widget.is_editing for _, widget in self.field_widgets):
             return
 
-        if event.key == "up":
+        if event.key in ("up", "down"):
             event.stop()
-            self.selected_index = max(0, self.selected_index - 1)
+            if event.key == "up":
+                self.selected_index = max(0, self.selected_index - 1)
+            else:
+                self.selected_index = min(len(self.field_widgets) - 1, self.selected_index + 1)
             self.refresh_highlight(is_focused=True)
-        elif event.key == "down":
-            event.stop()
-            self.selected_index = min(len(self.field_widgets) - 1, self.selected_index + 1)
-            self.refresh_highlight(is_focused=True)
+            field, _ = self.field_widgets[self.selected_index]
+            self.data_manager.current_pos = field.offset
         elif event.key == "enter":
             event.stop()
             field, widget = self.field_widgets[self.selected_index]

@@ -89,3 +89,29 @@ async def test_schema_inspector_edit(app):
         assert not app.hex_view.inspector.schema_view.field_widgets[0][1].is_editing
         await pilot.press("down")
         assert app.hex_view.inspector.schema_view.selected_index == 1
+
+
+@pytest.mark.asyncio
+async def test_schema_navigation_syncs_cursor(app):
+    async with app.run_test() as pilot:
+        # Enter edit mode
+        await pilot.press("e")
+        # Cycle to inspector
+        await pilot.press("tab")
+        await pilot.press("tab")
+        assert app.hex_view.active_section == ActiveSection.Inspector
+
+        # Toggle mode to schema tab
+        await pilot.press("m")
+        assert app.hex_view.inspector.tabs.active == "schema"
+
+        # Initially, current pos is 0
+        assert app.hex_view.data_manager.current_pos == 0
+
+        # Press down (moves from Magic [offset 0, size 4] to Version [offset 4])
+        await pilot.press("down")
+        assert app.hex_view.data_manager.current_pos == 4
+
+        # Press down (moves to Flags [offset 6])
+        await pilot.press("down")
+        assert app.hex_view.data_manager.current_pos == 6
