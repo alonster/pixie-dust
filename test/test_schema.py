@@ -192,3 +192,30 @@ class TestFieldUpdate:
     def test_update_binary():
         f = Field("Test", "binary")
         assert f.update_value_from_string("01000001") == b"A"
+
+
+class TestFieldEditFormat:
+    @staticmethod
+    def test_edit_format_int():
+        f = Field("Int", "uint8", value=12)
+        assert f.edit_format() == "12"
+
+    @staticmethod
+    def test_edit_format_float():
+        f = Field("Float", "float", value=3.14)
+        assert f.edit_format() == "3.1400"
+
+    @staticmethod
+    def test_edit_format_string():
+        f = Field("String", "string8", value="hello\x00\x00")
+        assert f.edit_format() == "hello"
+
+    @staticmethod
+    def test_edit_format_binary():
+        f = Field("Binary", "binary", value=0x41)
+        assert f.edit_format() == "01000001"
+
+    @staticmethod
+    def test_edit_format_none():
+        f = Field("Empty", "uint32", value=None)
+        assert f.edit_format() == "-"

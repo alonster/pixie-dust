@@ -62,6 +62,8 @@ class Field:
     def edit_format(self) -> str:
         if self.type.lower() == "uint8":
             return f"{self.value}"
+        if self.type.lower().startswith("string"):
+            return str(self.value).rstrip('\x00')
 
         return self.format()
 
