@@ -165,3 +165,8 @@ class TestFieldFormat:
     def test_none():
         f = Field("Empty", "uint8", value=None)
         assert f.format() == "-"
+
+    @staticmethod
+    def test_binary():
+        f = Field("Binary", "binary", value=0x41)
+        assert f.format() == "01000001"

@@ -1,10 +1,9 @@
-import struct
-
 from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.widgets import Static
 
 from PixieDust.utils.data_manager import DataManager
+from PixieDust.utils.schema import Field
 from PixieDust.views.inspector.grid import KeyValueGrid
 
 class RawInspector(Vertical):
@@ -13,35 +12,29 @@ class RawInspector(Vertical):
         self.data_manager = data_manager
 
         self.address_value = Static("0x00000000")
-        self.byte_value = Static("0x00 | 0")
-        self.bin_value = Static("00000000")
-        self.u32_le = Static("-")
-        self.u32_be = Static("-")
+        self.fields = [
+            Field("Byte/U8", "uint8"),
+            Field("Binary", "binary"),
+            Field("UInt32 LE", "uint32", is_little_endian=True),
+            Field("UInt32 BE", "uint32", is_little_endian=False),
+        ]
+        self.field_widgets = []
 
     def compose(self) -> ComposeResult:
         with KeyValueGrid() as grid:
             yield from grid.add_pair("Address", self.address_value)
-            yield from grid.add_pair("Byte/U8", self.byte_value)
-            yield from grid.add_pair("Binary", self.bin_value)
-            yield from grid.add_pair("UInt32 LE", self.u32_le)
-            yield from grid.add_pair("UInt32 BE", self.u32_be)
+            for field in self.fields:
+                widget = Static("-")
+                self.field_widgets.append((field, widget))
+                yield from grid.add_pair(field.name, widget)
 
     def update_info(self, update: DataManager.PositionUpdate) -> None:
         self.address_value.update(f"0x{update.position:08X}")
-        data_chunk = self.data_manager.get_data()[update.position:update.position + 4]
+        data = self.data_manager.get_data()
 
-        if len(data_chunk) >= 1:
-            byte = data_chunk[0]
-            self.byte_value.update(f"0x{byte:02X} | {byte}")
-            self.bin_value.update(f"{byte:08b}")
-
-        if len(data_chunk) >= 4:
-            le = struct.unpack("<I", data_chunk[:4])[0]
-            be = struct.unpack(">I", data_chunk[:4])[0]
-            self.u32_le.update(str(le))
-            self.u32_be.update(str(be))
-        else:
-            self.u32_le.update("-")
-            self.u32_be.update("-")
+        for field, widget in self.field_widgets:
+            field.offset = update.position
+            field.set_value(data)
+            widget.update(field.format())
 
         self.refresh()

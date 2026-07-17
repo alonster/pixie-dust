@@ -14,6 +14,7 @@ TYPE_MAP = {
     "int64": "q",
     "float": "f",
     "double": "d",
+    "binary": "B",
 }
 
 
@@ -43,10 +44,13 @@ class Field:
             return "-"
 
         if isinstance(self.value, int):
-            if self.type.lower() in ("int8", "int16", "int32", "int64"):
+            type_lower = self.type.lower()
+            if type_lower in ("int8", "int16", "int32", "int64"):
                 return f"{self.value}"
-            elif self.type.lower() == "uint8":
+            elif type_lower == "uint8":
                 return f"{self.value} | 0x{self.value:02X}"
+            elif type_lower == "binary":
+                return f"{self.value:08b}"
 
             return f"{self.value} | 0x{self.value:X}"
 
