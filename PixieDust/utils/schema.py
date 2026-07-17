@@ -59,6 +59,12 @@ class Field:
 
         return str(f"'{self.value}'")
 
+    def edit_format(self) -> str:
+        if self.type.lower() == "uint8":
+            return f"{self.value}"
+
+        return self.format()
+
     def set_value(self, data: bytes | memoryview):
         if self.offset + self.size <= len(data):
             if self.type.lower().startswith("string"):
@@ -69,6 +75,25 @@ class Field:
         else:
             # Not enough data for this field
             self.value = None
+
+    def update_value_from_string(self, value_str: str) -> bytes:
+        type_lower = self.type.lower()
+        if type_lower.startswith("string"):
+            encoded = value_str.encode("ascii", errors="replace")
+            return encoded.ljust(self.size, b"\x00")[:self.size]
+        elif type_lower in ("float", "double"):
+            val = float(value_str)
+            return struct.pack(self.struct_format, val)
+        elif type_lower == "binary":
+            try:
+                val = int(value_str, 2)
+            except ValueError:
+                # Allow updating binary fields with decimal/hex values
+                val = int(value_str, 0)
+            return struct.pack(self.struct_format, val)
+        else:
+            val = int(value_str, 0)
+            return struct.pack(self.struct_format, val)
 
 
 @dataclass

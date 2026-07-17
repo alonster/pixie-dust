@@ -80,3 +80,7 @@ class DataManager(Container):
     def update_byte_and_advance(self, new_value: int):
         self.update_byte(new_value)
         self.current_pos += 1
+
+    def update_data_range(self, offset: int, new_bytes: bytes):
+        self._data[offset:offset + len(new_bytes)] = new_bytes
+        self.post_message(self.DataUpdate(offset, length=len(new_bytes)))

@@ -1,15 +1,18 @@
 from textual.app import ComposeResult
-from textual.containers import Vertical, VerticalScroll
-from textual.widgets import Label, Static
+from textual.containers import VerticalScroll
+from textual.widgets import Label
 
+from PixieDust.utils.data_manager import DataManager
 from PixieDust.utils.schema import Schema, Field
 from PixieDust.views.inspector.grid import KeyValueGrid
+from PixieDust.views.inspector.editable_field import EditableField
+from PixieDust.views.inspector.base_inspector import BaseInspectorView
 from PixieDust.utils.styles import Color
 
 
-class SchemaView(Vertical):
-    def __init__(self, schema: Schema | None = None):
-        super().__init__()
+class SchemaView(BaseInspectorView):
+    def __init__(self, data_manager: DataManager, schema: Schema | None = None):
+        super().__init__(data_manager)
         # Placeholder demo schema
         self.schema = schema or Schema("Demo Schema", [
             Field("Magic", "uint32"),
@@ -21,7 +24,7 @@ class SchemaView(Vertical):
         ])
         self.title = Label(f" {self.schema.name}")
         self.grid = None
-        self.field_widgets = []
+        self.active_index = 0
 
     def compose(self) -> ComposeResult:
         yield self.title
@@ -29,14 +32,14 @@ class SchemaView(Vertical):
             with KeyValueGrid() as grid:
                 self.grid = grid
                 for field in self.schema.fields:
-                    value_static = Static("-")
-                    self.field_widgets.append(value_static)
-                    yield from grid.add_pair(field.name, value_static)
+                    widget = EditableField("-")
+                    self.field_widgets.append((field, widget))
+                    yield from grid.add_pair(field.name, widget)
 
     def on_mount(self) -> None:
-        self._apply_styles()
+        self._apply_title_style()
 
-    def _apply_styles(self) -> None:
+    def _apply_title_style(self) -> None:
         self.title.styles.background = Color.mediumpurple
         self.title.styles.color = Color.white
         self.title.styles.text_style = "bold"
@@ -49,22 +52,19 @@ class SchemaView(Vertical):
             return active_field
 
         self.schema.parse(data)
+        self.active_index = -1
 
-        for field, widget in zip(self.schema.fields, self.field_widgets):
+        for index, field in enumerate(self.schema.fields):
+            _, widget = self.field_widgets[index]
             is_active = field.offset <= current_position < field.offset + field.size
             if is_active:
                 active_field = field
+                self.active_index = index
 
-            widget.update(field.format())
+            widget.update_value(field.format())
 
-            # Update highlighting
-            if is_active:
-                widget.styles.background = Color.mediumpurple
-                widget.styles.color = Color.white
-                widget.styles.text_style = "bold"
-            else:
-                widget.styles.background = Color.deep_grey
-                widget.styles.color = Color.white
-                widget.styles.text_style = "none"
+        if not self.is_focused_view:
+            self.selected_index = self.active_index
 
+        self._apply_widget_styles()
         return active_field

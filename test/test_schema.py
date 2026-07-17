@@ -170,3 +170,25 @@ class TestFieldFormat:
     def test_binary():
         f = Field("Binary", "binary", value=0x41)
         assert f.format() == "01000001"
+
+
+class TestFieldUpdate:
+    @staticmethod
+    def test_update_uint8_decimal():
+        f = Field("Test", "uint8")
+        assert f.update_value_from_string("65") == b"A"
+
+    @staticmethod
+    def test_update_uint8_hex():
+        f = Field("Test", "uint8")
+        assert f.update_value_from_string("0x41") == b"A"
+
+    @staticmethod
+    def test_update_uint32_le():
+        f = Field("Test", "uint32", is_little_endian=True)
+        assert f.update_value_from_string("305419896") == b"\x78\x56\x34\x12"
+
+    @staticmethod
+    def test_update_binary():
+        f = Field("Test", "binary")
+        assert f.update_value_from_string("01000001") == b"A"

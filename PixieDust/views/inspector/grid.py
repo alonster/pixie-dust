@@ -1,6 +1,7 @@
 from textual.app import ComposeResult
 from textual.containers import Grid
-from textual.widgets import Label, Static
+from textual.widget import Widget
+from textual.widgets import Label
 
 from PixieDust.utils.styles import Color
 
@@ -14,7 +15,7 @@ class KeyValueGrid(Grid):
         self.styles.height = "auto"
 
     @staticmethod
-    def add_pair(key: str, value: Static) -> ComposeResult:
+    def add_pair(key: str, value: Widget) -> ComposeResult:
         label = Label(f"{key}:")
         
         # Style the Label (Key)
