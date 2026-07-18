@@ -115,3 +115,22 @@ async def test_schema_navigation_syncs_cursor(app):
         # Press down (moves to Flags [offset 6])
         await pilot.press("down")
         assert app.hex_view.data_manager.current_pos == 6
+
+
+@pytest.mark.asyncio
+async def test_cancel_exit_when_editing(app):
+    async with app.run_test() as pilot:
+        assert app.hex_view.active_section == ActiveSection.NONE
+
+        # Toggle on
+        await pilot.press("e")
+
+        # Try to quit
+        await pilot.press("q")
+
+        # Press right arrow to cancel
+        await pilot.press("right")
+        await pilot.press("enter")
+
+        # Make sure app is still running
+        assert app.is_running

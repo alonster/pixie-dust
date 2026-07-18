@@ -1,3 +1,4 @@
+from textual import events
 from textual.app import ComposeResult
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
@@ -41,6 +42,11 @@ class QuitScreen(ModalScreen[bool]):
             btn = self.query_one(btn_id)
             btn.styles.margin = (0, 8)
             btn.styles.width = 16
+
+    def on_key(self, event: events.Key) -> None:
+        if event.key in ("left", "right"):
+            event.stop()
+            self.focus_next()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "quit":
