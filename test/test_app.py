@@ -1,5 +1,11 @@
 import pytest
+import pathlib
+import unittest.mock as mock
+from click.testing import CliRunner
 
+from PixieDust.cli import main
+from PixieDust.utils.file_manager import FileManager
+from PixieDust.utils.schema_manager import SchemaManager
 from PixieDust.utils.enums import ActiveSection
 
 
@@ -134,3 +140,41 @@ async def test_cancel_exit_when_editing(app):
 
         # Make sure app is still running
         assert app.is_running
+
+
+@pytest.mark.asyncio
+async def test_app_loads_custom_yaml_schema(app):
+    async with app.run_test() as pilot:
+        # Enter edit mode
+        await pilot.press("e")
+        # Cycle to inspector
+        await pilot.press("tab")
+        await pilot.press("tab")
+        # Toggle mode to schema tab
+        await pilot.press("m")
+
+        schema_view = app.hex_view.inspector.schema_view
+        assert schema_view.schema.name == "Demo Schema"
+        assert len(schema_view.schema.fields) == 6
+
+
+def test_cli_file_and_schema_arguments(tmp_path):
+    dummy_bin = tmp_path / "dummy.bin"
+    dummy_bin.write_bytes(b"\x00" * 32)
+
+    dummy_yaml = tmp_path / "dummy.yaml"
+    dummy_yaml.write_text("""
+name: "CLI Mock Schema"
+fields:
+  - name: "DummyField"
+    type: "uint8"
+""")
+
+    with mock.patch("PixieDust.cli.PixieDust") as MockApp:
+        runner = CliRunner()
+        result = runner.invoke(main, [str(dummy_bin), "--schema", str(dummy_yaml)])
+
+        assert result.exit_code == 0
+        assert FileManager.get_path() == dummy_bin
+        assert SchemaManager.get_path() == dummy_yaml
+        MockApp.assert_called_once()

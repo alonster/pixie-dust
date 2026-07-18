@@ -1,5 +1,7 @@
 import struct
+import yaml
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List, Any
 
 
@@ -112,3 +114,26 @@ class Schema:
     def parse(self, data: bytes | memoryview):
         for f in self.fields:
             f.set_value(data)
+
+    @classmethod
+    def load_from_yaml(cls, path: Path) -> "Schema":
+        with open(path, "r") as f:
+            data = yaml.safe_load(f)
+
+        name = data.get("name", "Unnamed Schema")
+        fields_data = data.get("fields", [])
+
+        fields = []
+        for fd in fields_data:
+            field_name = fd.get("name")
+            field_type = fd.get("type")
+            endian = fd.get("endian", "little")
+            is_little_endian = (endian != "big")
+
+            fields.append(Field(
+                name=field_name,
+                type=field_type,
+                is_little_endian=is_little_endian
+            ))
+
+        return cls(name=name, fields=fields)

@@ -7,26 +7,31 @@ from PixieDust.utils.schema import Schema, Field
 from PixieDust.views.inspector.grid import KeyValueGrid
 from PixieDust.views.inspector.editable_field import EditableField
 from PixieDust.views.inspector.base_inspector import BaseInspectorView
+from PixieDust.utils.schema_manager import SchemaManager
 from PixieDust.utils.styles import Color
 
 
 class SchemaView(BaseInspectorView):
     def __init__(self, data_manager: DataManager, schema: Schema | None = None):
         super().__init__(data_manager)
-        # Placeholder demo schema
-        self.schema = schema or Schema("Demo Schema", [
-            Field("Magic", "uint32"),
-            Field("Version", "uint16"),
-            Field("Flags", "uint8"),
-            Field("Negative", "int8"),
-            Field("Offset", "uint32"),
-            Field("Size", "uint32"),
-        ])
-        self.title = Label(f" {self.schema.name}")
+        self.schema = schema
+        self.title = Label("-")
         self.grid = None
         self.active_index = 0
 
     def compose(self) -> ComposeResult:
+        if self.schema is None:
+            schema_path = SchemaManager.get_path()
+            if schema_path:
+                try:
+                    self.schema = Schema.load_from_yaml(schema_path)
+                except Exception as e:
+                    self.notify(f"Failed to load schema: {e}", severity="error")
+
+        if self.schema is None:
+            self.schema = Schema("No Schema Loaded", [])
+
+        self.title = Label(f" {self.schema.name}")
         yield self.title
         with VerticalScroll():
             with KeyValueGrid() as grid:
