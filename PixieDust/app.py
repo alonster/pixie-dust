@@ -3,6 +3,7 @@ from textual.widgets import Header, Footer
 
 from PixieDust.views.hex_view import HexView
 from PixieDust.views.quit_screen import UnsavedQuitScreen, EditingQuitScreen
+from PixieDust.views.preferences_screen import PreferencesScreen
 
 
 class PixieDust(App):
@@ -10,6 +11,7 @@ class PixieDust(App):
         ("q", "quit_with_check", "Quit"),
         ("o", "open_file", "Open"),
         ("e", "toggle_edit", "Edit Mode"),
+        ("p", "open_preferences", "Preferences"),
         ("ctrl+s", "save", "Save"),
     ]
 
@@ -24,6 +26,9 @@ class PixieDust(App):
 
     def action_toggle_edit(self) -> None:
         self.hex_view.action_toggle_edit()
+
+    def action_open_preferences(self) -> None:
+        self.push_screen(PreferencesScreen())
 
     def action_save(self) -> None:
         self.hex_view.save_file()

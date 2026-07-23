@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Any
 
+from PixieDust.utils.preferences_manager import PreferencesManager
+
 
 TYPE_MAP = {
     "uint8": "B",
@@ -84,16 +86,23 @@ class Field:
         type_lower = self.type.lower()
         if type_lower.startswith("string"):
             encoded = value_str.encode("ascii", errors="replace")
+            if not PreferencesManager["string_overflow"] and len(encoded) > self.size:
+                raise ValueError(f"String length ({len(encoded)}) exceeds field capacity ({self.size})")
             return encoded.ljust(self.size, b"\x00")[:self.size]
         elif type_lower in ("float", "double"):
             val = float(value_str)
             return struct.pack(self.struct_format, val)
         elif type_lower == "binary":
-            try:
+            if PreferencesManager["binary_strict"]:
+                if not all(c in "01" for c in value_str) or len(value_str) > 8:
+                    raise ValueError("Binary string must contain only 0 and 1 digits (up to 8 bits)")
                 val = int(value_str, 2)
-            except ValueError:
-                # Allow updating binary fields with decimal/hex values
-                val = int(value_str, 0)
+            else:
+                try:
+                    val = int(value_str, 2)
+                except ValueError:
+                    # Allow updating binary fields with decimal/hex values
+                    val = int(value_str, 0)
             return struct.pack(self.struct_format, val)
         else:
             val = int(value_str, 0)

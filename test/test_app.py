@@ -6,6 +6,7 @@ from PixieDust.cli import main
 from PixieDust.utils.file_manager import FileManager
 from PixieDust.utils.schema_manager import SchemaManager
 from PixieDust.utils.enums import ActiveSection
+from PixieDust.views.preferences_screen import PreferencesScreen
 
 
 @pytest.mark.asyncio
@@ -201,3 +202,13 @@ async def test_schema_navigation_updates_highlight_range(app):
         assert active is not None
         assert active.offset == 4
         assert active.size == 2
+
+
+@pytest.mark.asyncio
+async def test_open_preferences_screen(app):
+    async with app.run_test() as pilot:
+        await pilot.press("p")
+        assert isinstance(app.screen, PreferencesScreen)
+
+        await pilot.press("escape")
+        assert not isinstance(app.screen, PreferencesScreen)
