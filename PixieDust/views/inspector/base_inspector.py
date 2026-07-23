@@ -2,6 +2,7 @@ from textual import events
 from textual.containers import Vertical
 from textual.message import Message
 from PixieDust.utils.data_manager import DataManager
+from PixieDust.utils.schema import Field
 from PixieDust.views.inspector.editable_field import InlineInput
 from PixieDust.utils.styles import Color
 
@@ -17,6 +18,11 @@ class BaseInspectorView(Vertical):
         self.selected_index = 0
         self.is_focused_view = False
 
+    def get_selected_field(self) -> Field | None:
+        if 0 <= self.selected_index < len(self.field_widgets):
+            return self.field_widgets[self.selected_index][0]
+        return None
+
     def handle_key_event(self, event: events.Key) -> None:
         if any(widget.is_editing for _, widget in self.field_widgets):
             return
@@ -30,6 +36,7 @@ class BaseInspectorView(Vertical):
             self.refresh_highlight(is_focused=True)
             field, _ = self.field_widgets[self.selected_index]
             self.data_manager.current_pos = field.offset
+            self.data_manager.active_field = field
         elif event.key == "enter":
             event.stop()
             field, widget = self.field_widgets[self.selected_index]

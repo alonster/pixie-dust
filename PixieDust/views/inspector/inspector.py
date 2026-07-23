@@ -29,8 +29,13 @@ class Inspector(Vertical):
             with TabPane("Schema View", id="schema"):
                 yield self.schema_view
 
+    def sync_active_field(self) -> None:
+        active_view = self.schema_view if self.tabs.active == "schema" else self.raw_view
+        self.data_manager.active_field = active_view.get_selected_field()
+
     def action_toggle_mode(self) -> None:
         self.tabs.active = "schema" if self.tabs.active == "raw" else "raw"
+        self.sync_active_field()
 
     def on_mount(self) -> None:
         self.styles.background = Color.dark_grey
@@ -60,3 +65,4 @@ class Inspector(Vertical):
         self.raw_view.update_info(update)
         active_field = self.schema_view.update_info(full_data, update.position)
         self.mini.update_field(active_field)
+        self.sync_active_field()

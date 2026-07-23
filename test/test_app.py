@@ -1,5 +1,4 @@
 import pytest
-import pathlib
 import unittest.mock as mock
 from click.testing import CliRunner
 
@@ -178,3 +177,27 @@ fields:
         assert FileManager.get_path() == dummy_bin
         assert SchemaManager.get_path() == dummy_yaml
         MockApp.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_schema_navigation_updates_highlight_range(app):
+    async with app.run_test() as pilot:
+        # Enter edit mode and cycle focus to inspector
+        await pilot.press("e")
+        await pilot.press("tab")
+        await pilot.press("tab")
+        # Toggle mode to schema view
+        await pilot.press("m")
+
+        # Initial selected field in sample_schema is Magic (offset 0, size 4)
+        active = app.hex_view.data_manager.active_field
+        assert active is not None
+        assert active.offset == 0
+        assert active.size == 4
+
+        # Navigate down to Version (offset 4, size 2)
+        await pilot.press("down")
+        active = app.hex_view.data_manager.active_field
+        assert active is not None
+        assert active.offset == 4
+        assert active.size == 2

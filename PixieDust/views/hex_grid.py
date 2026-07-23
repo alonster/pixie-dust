@@ -48,6 +48,7 @@ class HexGrid(Vertical):
             is_active_row = (index == self.data_manager.current_row)
             row.selected_column = self.data_manager.current_col if is_active_row else -1
             row.active_section = self.active_section if is_active_row else ActiveSection.NONE
+            row.active_field = self.data_manager.active_field
 
     def action_move_up(self) -> None:
         self.data_manager.move_up()

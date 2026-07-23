@@ -1,4 +1,7 @@
 import pytest
+from PixieDust.views.hex_row import HexRow
+from PixieDust.utils.enums import ActiveSection
+from PixieDust.utils.schema import Field
 
 
 @pytest.mark.asyncio
@@ -50,3 +53,11 @@ async def test_edit_ascii_section(app, key):
 
         await pilot.press(key)
         assert grid.data_manager.get_data()[1] == ord(key)
+
+
+def test_hex_row_field_highlight_rendering():
+    row = HexRow(offset=0, data=memoryview(b"\x00" * 16))
+    row.active_field = Field("Magic", "uint32", offset=0)
+
+    text = row.render_section(ActiveSection.Hex)
+    assert any("#36294c" in str(span.style) for span in text.spans)

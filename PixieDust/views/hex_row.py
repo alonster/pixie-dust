@@ -3,12 +3,14 @@ from textual.widgets import Static
 from rich.text import Text
 
 from PixieDust.utils.enums import ActiveSection
+from PixieDust.utils.schema import Field
 from PixieDust.utils.styles import Color
 
 
 class HexRow(Static):
     selected_column = reactive(-1)
     active_section = reactive(ActiveSection.NONE)
+    active_field: reactive[Field | None] = reactive(None)
 
     def __init__(self, offset: int, data: memoryview):
         super().__init__()
@@ -50,12 +52,18 @@ class HexRow(Static):
     def render_section(self, current_section: ActiveSection) -> Text:
         section_text = Text()
         is_active = (self.active_section == current_section)
+        field = self.active_field
 
         for position, byte in enumerate(self.data):
             style = self.byte_color(byte)
             data_repr = self.byte_representation(byte, current_section)
+            absolute_pos = self.data_offset + position
+            is_field_highlight = (field is not None and field.offset <= absolute_pos < field.offset + field.size)
+
             if position == self.selected_column:
                 style = self.add_selected_style(style, is_active)
+            elif is_field_highlight:
+                style = f"{style} on #36294c"
 
             section_text.append(data_repr, style=style)
             if current_section == ActiveSection.Hex:

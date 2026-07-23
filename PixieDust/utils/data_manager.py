@@ -3,10 +3,12 @@ from textual.message import Message
 from textual.reactive import reactive
 
 from PixieDust.utils.file_manager import FileManager
+from PixieDust.utils.schema import Field
 
 
 class DataManager(Container):
     _current_pos = reactive(0)
+    _active_field: reactive[Field | None] = reactive(None)
     _data = bytearray(b'')
 
     BYTES_IN_ROW = 16
@@ -40,6 +42,16 @@ class DataManager(Container):
     def current_pos(self, value: int) -> None:
         max_pos = max(0, (len(self._data)) - 1)
         self._current_pos = max(0, min(value, max_pos))
+
+    @property
+    def active_field(self) -> Field | None:
+        return self._active_field
+
+    @active_field.setter
+    def active_field(self, value: Field | None) -> None:
+        if self._active_field != value:
+            self._active_field = value
+            self.post_message(self.PositionUpdate(self.current_pos))
 
     @property
     def current_row(self) -> int:
