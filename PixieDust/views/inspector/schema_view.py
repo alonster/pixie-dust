@@ -7,7 +7,6 @@ from PixieDust.utils.schema import Schema, Field
 from PixieDust.views.inspector.grid import KeyValueGrid
 from PixieDust.views.inspector.editable_field import EditableField
 from PixieDust.views.inspector.base_inspector import BaseInspectorView
-from PixieDust.utils.schema_manager import SchemaManager
 from PixieDust.utils.styles import Color
 
 
@@ -21,7 +20,7 @@ class SchemaView(BaseInspectorView):
 
     def compose(self) -> ComposeResult:
         if self.schema is None:
-            schema_path = SchemaManager.get_path()
+            schema_path = self.data_manager.schema_path
             if schema_path:
                 try:
                     self.schema = Schema.load_from_yaml(schema_path)

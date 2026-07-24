@@ -6,7 +6,6 @@ from PixieDust.utils.schema import Field
 from PixieDust.views.inspector.grid import KeyValueGrid
 from PixieDust.views.inspector.editable_field import EditableField
 from PixieDust.views.inspector.base_inspector import BaseInspectorView
-from PixieDust.utils.styles import Color
 
 class RawInspector(BaseInspectorView):
     def __init__(self, data_manager: DataManager):
@@ -27,15 +26,6 @@ class RawInspector(BaseInspectorView):
                 widget = EditableField("-")
                 self.field_widgets.append((field, widget))
                 yield from grid.add_pair(field.name, widget)
-
-    def _apply_widget_styles(self) -> None:
-        for index, (_, widget) in enumerate(self.field_widgets):
-            if self.is_focused_view and index == self.selected_index:
-                widget.styles.background = Color.mediumpurple
-                widget.static_val.styles.text_style = "bold"
-            else:
-                widget.styles.background = Color.deep_grey
-                widget.static_val.styles.text_style = "none"
 
     def update_info(self, update: DataManager.PositionUpdate) -> None:
         self.address_value.update(f"0x{update.position:08X}")

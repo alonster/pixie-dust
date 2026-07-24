@@ -2,6 +2,7 @@ from textual.reactive import reactive
 from textual.widgets import Static
 from rich.text import Text
 
+from PixieDust.utils.data_manager import DataManager
 from PixieDust.utils.enums import ActiveSection
 from PixieDust.utils.schema import Field
 from PixieDust.utils.styles import Color
@@ -74,7 +75,7 @@ class HexRow(Static):
                 if current_section == ActiveSection.Hex:
                     section_text.append(" ")
 
-        for pos_index in range(len(self.data), 16):
+        for pos_index in range(len(self.data), DataManager.BYTES_IN_ROW):
             if pos_index == self.selected_column:
                 cursor_style = self.add_selected_style(Color.bright_black, is_active)
                 cursor_repr = "++" if current_section == ActiveSection.Hex else "+"

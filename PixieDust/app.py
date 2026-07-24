@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer
 
@@ -15,9 +17,9 @@ class PixieDust(App):
         ("ctrl+s", "save", "Save"),
     ]
 
-    def __init__(self):
+    def __init__(self, file_path: Path | None = None, schema_path: Path | None = None):
         super().__init__()
-        self.hex_view = HexView()
+        self.hex_view = HexView(file_path=file_path, schema_path=schema_path)
 
     def compose(self) -> ComposeResult:
         yield Header()

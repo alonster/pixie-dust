@@ -3,8 +3,6 @@ import unittest.mock as mock
 from click.testing import CliRunner
 
 from PixieDust.cli import main
-from PixieDust.utils.file_manager import FileManager
-from PixieDust.utils.schema_manager import SchemaManager
 from PixieDust.utils.enums import ActiveSection
 from PixieDust.views.preferences_screen import PreferencesScreen
 
@@ -175,9 +173,7 @@ fields:
         result = runner.invoke(main, [str(dummy_bin), "--schema", str(dummy_yaml)])
 
         assert result.exit_code == 0
-        assert FileManager.get_path() == dummy_bin
-        assert SchemaManager.get_path() == dummy_yaml
-        MockApp.assert_called_once()
+        MockApp.assert_called_once_with(file_path=dummy_bin, schema_path=dummy_yaml)
 
 
 @pytest.mark.asyncio

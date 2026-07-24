@@ -1,17 +1,30 @@
+from pathlib import Path
+
 from textual.containers import Container
 from textual.message import Message
 from textual.reactive import reactive
 
-from PixieDust.utils.file_manager import FileManager
 from PixieDust.utils.schema import Field
 from PixieDust.utils.enums import EditMode
+
+
+class FileUtils:
+    @staticmethod
+    def read_data_from_file(path: Path) -> bytearray:
+        with open(path, "rb") as f:
+            return bytearray(f.read())
+
+    @staticmethod
+    def save_data_to_file(path: Path, data: bytearray) -> None:
+        with open(path, "wb") as f:
+            f.write(data)
 
 
 class DataManager(Container):
     _current_pos = reactive(0)
     _active_field: reactive[Field | None] = reactive(None)
     _edit_mode = reactive(EditMode.INSERT)
-    _data = bytearray(b'')
+    _data = bytearray()
 
     BYTES_IN_ROW = 16
 
@@ -25,13 +38,23 @@ class DataManager(Container):
             super().__init__(position)
             self.length = length
 
+    def __init__(self, file_path: Path | None = None, schema_path: Path | None = None):
+        super().__init__()
+        self.file_path = file_path
+        self.schema_path = schema_path
+
+    @property
+    def file_name(self) -> str:
+        return self.file_path.name if self.file_path else "Untitled"
+
     def load_data_from_file(self):
-        if not self._data:
-            self._data = FileManager.read_data_from_file()
+        if not self._data and self.file_path and self.file_path.exists() and self.file_path.is_file():
+            self._data = FileUtils.read_data_from_file(self.file_path)
             self.current_pos = 0
 
     def save_data_to_file(self):
-        FileManager.save_data_to_file(self._data)
+        if self.file_path:
+            FileUtils.save_data_to_file(self.file_path, self._data)
 
     def get_data(self) -> memoryview:
         return memoryview(bytes(self._data))
@@ -89,10 +112,10 @@ class DataManager(Container):
         self.current_pos += relative_offset
 
     def move_up(self) -> None:
-        self.change_current_pos_by(-16)
+        self.change_current_pos_by(-self.BYTES_IN_ROW)
 
     def move_down(self) -> None:
-        self.change_current_pos_by(16)
+        self.change_current_pos_by(self.BYTES_IN_ROW)
 
     def move_left(self) -> None:
         self.change_current_pos_by(-1)

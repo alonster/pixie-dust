@@ -1,10 +1,11 @@
+from pathlib import Path
+
 from textual.app import ComposeResult
 from textual.containers import Horizontal
 from textual.reactive import reactive
 
 from PixieDust.utils.enums import ActiveSection
 from PixieDust.utils.data_manager import DataManager
-from PixieDust.utils.file_manager import FileManager
 from PixieDust.views.hex_grid import HexGrid
 from PixieDust.views.inspector.inspector import Inspector
 
@@ -18,9 +19,9 @@ class HexView(Horizontal):
         ("m", "toggle_mode", "Toggle Mode"),
     ]
 
-    def __init__(self):
+    def __init__(self, file_path: Path | None = None, schema_path: Path | None = None):
         super().__init__()
-        self.data_manager = DataManager()
+        self.data_manager = DataManager(file_path=file_path, schema_path=schema_path)
         self.grid = HexGrid(self.data_manager)
         self.inspector = Inspector(self.data_manager)
 
@@ -87,12 +88,12 @@ class HexView(Horizontal):
     def update_title(self, has_unsaved_changes: bool = False) -> None:
         indicator = " *" if has_unsaved_changes else ""
         mode_badge = f" [{self.data_manager.edit_mode.value.upper()}]" if self.active_section.is_editable() else ""
-        self.app.title = f"PixieDust - {FileManager.get_file_name()}{mode_badge}{indicator}"
+        self.app.title = f"PixieDust - {self.data_manager.file_name}{mode_badge}{indicator}"
 
     def save_file(self) -> None:
         try:
             self.data_manager.save_data_to_file()
-            self.notify(f"Saved: {FileManager.get_file_name()}", severity="information")
+            self.notify(f"Saved: {self.data_manager.file_name}", severity="information")
             self.has_unsaved_changes = False
         except Exception as e:
             self.notify(f"Save failed: {e}", severity="error")
