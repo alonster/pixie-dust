@@ -8,3 +8,8 @@ class ActiveSection(Enum):
 
     def is_editable(self):
         return self != ActiveSection.NONE
+
+
+class EditMode(Enum):
+    INSERT = "Insert"
+    APPEND = "Append"

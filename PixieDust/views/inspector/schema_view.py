@@ -52,7 +52,8 @@ class SchemaView(BaseInspectorView):
         self.title.styles.margin = (0, 0, 1, 0)
 
     def update_info(self, data: memoryview, current_position: int) -> Field:
-        active_field = Field("Raw Byte", "uint8", offset=current_position, value=data[current_position])
+        byte_value = data[current_position] if current_position < len(data) else 0
+        active_field = Field("Raw Byte", "uint8", offset=current_position, value=byte_value)
         if not self.schema:
             return active_field
 

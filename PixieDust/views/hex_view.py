@@ -71,18 +71,23 @@ class HexView(Horizontal):
     def on_data_manager_position_update(self, message: DataManager.PositionUpdate) -> None:
         self.grid.refresh_selection()
         self.inspector.update_info(message)
+        self.update_title(self.has_unsaved_changes)
 
     def on_data_manager_data_update(self, message: DataManager.DataUpdate) -> None:
         self.has_unsaved_changes = True
         self.grid.update_data(message)
         self.inspector.update_info(message)
 
+    def watch_active_section(self, value: ActiveSection) -> None:
+        self.update_title(self.has_unsaved_changes)
+
     def watch_has_unsaved_changes(self, value: bool) -> None:
         self.update_title(value)
 
     def update_title(self, has_unsaved_changes: bool = False) -> None:
         indicator = " *" if has_unsaved_changes else ""
-        self.app.title = f"PixieDust - {FileManager.get_file_name()}{indicator}"
+        mode_badge = f" [{self.data_manager.edit_mode.value.upper()}]" if self.active_section.is_editable() else ""
+        self.app.title = f"PixieDust - {FileManager.get_file_name()}{mode_badge}{indicator}"
 
     def save_file(self) -> None:
         try:

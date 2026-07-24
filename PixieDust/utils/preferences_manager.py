@@ -12,6 +12,7 @@ class PreferencesManager:
     OPTIONS: list[PreferenceOption] = [
         PreferenceOption("binary_strict", "Strict Binary Parsing (01000001 only)", default=False),
         PreferenceOption("string_overflow", "Allow String Truncation (When too long)", default=True),
+        PreferenceOption("default_edit_mode", "Default Edit Mode (Insert/Append)", default=False),
     ]
     _values: dict[str, bool] = {opt.key: opt.default for opt in OPTIONS}
 

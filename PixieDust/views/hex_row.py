@@ -74,10 +74,17 @@ class HexRow(Static):
                 if current_section == ActiveSection.Hex:
                     section_text.append(" ")
 
-        padding_needed = 16 - len(self.data)
-        for padding in range(padding_needed):
-            section_text.append("   " if current_section == ActiveSection.Hex else " ")
-            if padding_needed - padding == 9:
+        for pos_index in range(len(self.data), 16):
+            if pos_index == self.selected_column:
+                cursor_style = self.add_selected_style(Color.bright_black, is_active)
+                cursor_repr = "++" if current_section == ActiveSection.Hex else "+"
+                section_text.append(cursor_repr, style=cursor_style)
+                if current_section == ActiveSection.Hex:
+                    section_text.append(" ")
+            else:
+                section_text.append("   " if current_section == ActiveSection.Hex else " ")
+
+            if pos_index == 7:
                 section_text.append("┊", style=Color.white)
                 if current_section == ActiveSection.Hex:
                     section_text.append(" ")
