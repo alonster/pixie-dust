@@ -121,3 +121,16 @@ class DataManager(Container):
     def update_data_range(self, offset: int, new_bytes: bytes):
         self._data[offset:offset + len(new_bytes)] = new_bytes
         self.post_message(self.DataUpdate(offset, length=len(new_bytes)))
+
+    def remove_byte(self, at_current: bool = True) -> None:
+        target_pos = self.current_pos if at_current else self.current_pos - 1
+        if target_pos < 0 or target_pos >= len(self._data):
+            return
+
+        if self._edit_mode == EditMode.INSERT:
+            self._data[target_pos] = 0
+        else:
+            del self._data[target_pos]
+
+        self.current_pos = target_pos
+        self.post_message(self.DataUpdate(target_pos, length=1))

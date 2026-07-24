@@ -21,6 +21,8 @@ class HexGrid(Vertical):
         Binding("escape", "exit_edit_mode", show=False),
         Binding("ctrl+a", "toggle_edit_mode", show=False),
         Binding("insert", "toggle_edit_mode", show=False),
+        Binding("backspace", "handle_backspace", show=False),
+        Binding("delete", "handle_delete", show=False),
     ]
 
     def __init__(self, data_manager: DataManager):
@@ -81,6 +83,16 @@ class HexGrid(Vertical):
                 data_len = len(self.data_manager.get_data())
                 if self.data_manager.current_pos >= data_len:
                     self.data_manager.current_pos = max(0, data_len - 1)
+
+    def action_handle_backspace(self) -> None:
+        if self.active_section.is_editable():
+            self._edit_buffer = ""
+            self.data_manager.remove_byte(at_current=False)
+
+    def action_handle_delete(self) -> None:
+        if self.active_section.is_editable():
+            self._edit_buffer = ""
+            self.data_manager.remove_byte(at_current=True)
 
     def on_key(self, event: "events.Key") -> None:
         if not self.active_section.is_editable():
