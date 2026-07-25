@@ -4,10 +4,11 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal
 from textual.reactive import reactive
 
-from PixieDust.utils.enums import ActiveSection
+from PixieDust.utils.enums import ActiveSection, EditMode
 from PixieDust.utils.data_manager import DataManager
 from PixieDust.views.hex_grid import HexGrid
 from PixieDust.views.inspector.inspector import Inspector
+from PixieDust.views.modals.goto_modal import GoToOffsetModal
 
 
 class HexView(Horizontal):
@@ -17,6 +18,7 @@ class HexView(Horizontal):
     BINDINGS = [
         ("tab", "next_section", "Next Section"),
         ("m", "toggle_mode", "Toggle Mode"),
+        ("g", "goto_offset", "Go to Offset"),
     ]
 
     def __init__(self, file_path: Path | None = None, schema_path: Path | None = None):
@@ -31,6 +33,16 @@ class HexView(Horizontal):
         yield self.data_manager
         yield self.grid
         yield self.inspector
+
+    def action_goto_offset(self) -> None:
+        data = self.data_manager.get_data()
+        max_offset = len(data) if self.data_manager.edit_mode == EditMode.APPEND else max(0, len(data) - 1)
+        self.app.push_screen(GoToOffsetModal(max_offset, self.data_manager.current_pos), self._on_goto_offset_submitted)
+
+    def _on_goto_offset_submitted(self, target_offset: int | None) -> None:
+        if target_offset is not None:
+            self.data_manager.current_pos = target_offset
+            self.grid.refresh_selection()
 
     def action_toggle_edit(self) -> None:
         if self.active_section == ActiveSection.NONE:
